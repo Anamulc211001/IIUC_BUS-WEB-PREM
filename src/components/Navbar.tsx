@@ -7,7 +7,10 @@ const Navbar: React.FC = () => {
   const { user, userProfile, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,14 +24,17 @@ const Navbar: React.FC = () => {
   // Auto-close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node) &&
+          menuButtonRef.current && !menuButtonRef.current.contains(event.target as Node)) {
         setIsMobileMenuOpen(false);
+        setIsHovering(false);
       }
     };
 
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsMobileMenuOpen(false);
+        setIsHovering(false);
       }
     };
 
@@ -52,10 +58,20 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     const handleRouteChange = () => {
       setIsMobileMenuOpen(false);
+      setIsHovering(false);
     };
 
     window.addEventListener('popstate', handleRouteChange);
     return () => window.removeEventListener('popstate', handleRouteChange);
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
   }, []);
 
   const scrollToSection = (sectionId: string) => {
@@ -65,6 +81,7 @@ const Navbar: React.FC = () => {
     }
     // Auto-close menu after navigation
     setIsMobileMenuOpen(false);
+    setIsHovering(false);
   };
 
   const getDashboardRoute = () => {
@@ -85,11 +102,52 @@ const Navbar: React.FC = () => {
   const handleLogout = async () => {
     await signOut();
     setIsMobileMenuOpen(false);
+    setIsHovering(false);
   };
 
   const handleLinkClick = () => {
     // Auto-close menu when clicking any link
     setIsMobileMenuOpen(false);
+    setIsHovering(false);
+  };
+
+  // Modern hover handlers for menu button
+  const handleMenuButtonMouseEnter = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setIsHovering(true);
+    setIsMobileMenuOpen(true);
+  };
+
+  const handleMenuButtonMouseLeave = () => {
+    // Add a small delay before closing to prevent accidental closes
+    hoverTimeoutRef.current = setTimeout(() => {
+      if (!isHovering) {
+        setIsMobileMenuOpen(false);
+      }
+    }, 150);
+  };
+
+  const handleMenuMouseEnter = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setIsHovering(true);
+  };
+
+  const handleMenuMouseLeave = () => {
+    setIsHovering(false);
+    // Close menu after a short delay when mouse leaves menu area
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsMobileMenuOpen(false);
+    }, 200);
+  };
+
+  const handleMenuButtonClick = () => {
+    // Toggle menu on click (for touch devices)
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+    setIsHovering(!isMobileMenuOpen);
   };
 
   return (
@@ -298,45 +356,80 @@ const Navbar: React.FC = () => {
               <Phone className="h-5 w-5" />
             </a>
 
-            {/* FIXED: Mobile Menu Button - Consistent Size */}
+            {/* ENHANCED: Mobile Menu Button with Hover/Drag Feature */}
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`lg:hidden relative w-11 h-11 rounded-xl transition-all shadow-md border flex items-center justify-center ${
+              ref={menuButtonRef}
+              onClick={handleMenuButtonClick}
+              onMouseEnter={handleMenuButtonMouseEnter}
+              onMouseLeave={handleMenuButtonMouseLeave}
+              className={`lg:hidden relative w-11 h-11 rounded-xl transition-all duration-300 shadow-md border flex items-center justify-center group ${
                 isScrolled 
                   ? 'text-gray-700 hover:bg-gray-100 border-gray-200' 
                   : 'text-white hover:bg-white/10 border-white/20'
-              }`}
+              } ${isMobileMenuOpen ? 'scale-110 shadow-lg' : ''}`}
               aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
               {/* User Status Indicator */}
               {user && userProfile && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
               )}
               
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {/* Enhanced Icon with Smooth Transition */}
+              <div className="relative">
+                {isMobileMenuOpen ? (
+                  <X className="h-5 w-5 transition-all duration-300 rotate-90 group-hover:rotate-180" />
+                ) : (
+                  <Menu className="h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
+                )}
+              </div>
+
+              {/* Hover Indicator */}
+              <div className={`absolute inset-0 rounded-xl transition-all duration-300 ${
+                isMobileMenuOpen 
+                  ? 'bg-blue-500/20 scale-110' 
+                  : 'bg-transparent scale-100 group-hover:bg-blue-500/10 group-hover:scale-105'
+              }`}></div>
             </button>
           </div>
         </div>
 
-        {/* FIXED: Enhanced Mobile Menu - Compact and User-Friendly */}
+        {/* ENHANCED: Mobile Menu with Hover/Drag Support */}
         {isMobileMenuOpen && (
           <>
             {/* Backdrop for click-outside detection */}
             <div 
-              className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
-              onClick={() => setIsMobileMenuOpen(false)}
+              className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity duration-300"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setIsHovering(false);
+              }}
             />
             
-            {/* FIXED: Mobile Menu Container - Compact Design */}
+            {/* ENHANCED: Mobile Menu Container with Hover Support */}
             <div 
               ref={mobileMenuRef}
-              className="lg:hidden absolute top-full left-4 right-4 mt-2 bg-white/95 backdrop-blur-md border border-gray-200/50 shadow-2xl rounded-2xl overflow-hidden animate-fade-slide-up z-50 max-h-[80vh] overflow-y-auto"
+              onMouseEnter={handleMenuMouseEnter}
+              onMouseLeave={handleMenuMouseLeave}
+              className="lg:hidden absolute top-full left-4 right-4 mt-2 bg-white/95 backdrop-blur-md border border-gray-200/50 shadow-2xl rounded-2xl overflow-hidden z-50 max-h-[80vh] overflow-y-auto transform transition-all duration-300 ease-out animate-fade-slide-up"
+              style={{
+                animation: isMobileMenuOpen 
+                  ? 'fadeSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards' 
+                  : 'fadeSlideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+              }}
             >
               <div className="p-4 space-y-3">
                 
+                {/* Hover Indicator */}
+                <div className="text-center py-2 border-b border-gray-200">
+                  <p className="text-xs text-gray-500 flex items-center justify-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span>Hover or click to navigate</span>
+                  </p>
+                </div>
+                
                 {/* User Info Section - Compact */}
                 {user && userProfile && (
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-200 mb-3">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-200 mb-3 transform transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
                         <User className="h-4 w-4 text-white" />
@@ -349,43 +442,43 @@ const Navbar: React.FC = () => {
                   </div>
                 )}
 
-                {/* Navigation Links - Auto-close on click */}
+                {/* Navigation Links - Enhanced with Hover Effects */}
                 <div className="space-y-1">
                   <button
                     onClick={() => scrollToSection('home')}
-                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all text-sm font-medium"
+                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200 text-sm font-medium group hover:scale-[1.02] hover:shadow-sm"
                   >
-                    <Bus className="h-4 w-4" />
+                    <Bus className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
                     <span>Home</span>
                   </button>
                   
                   <button
                     onClick={() => scrollToSection('search-filters')}
-                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all text-sm font-medium"
+                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200 text-sm font-medium group hover:scale-[1.02] hover:shadow-sm"
                   >
-                    <Search className="h-4 w-4" />
+                    <Search className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
                     <span>Search Schedules</span>
                   </button>
                   
                   <button
                     onClick={() => scrollToSection('schedules')}
-                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all text-sm font-medium"
+                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200 text-sm font-medium group hover:scale-[1.02] hover:shadow-sm"
                   >
-                    <Clock className="h-4 w-4" />
+                    <Clock className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
                     <span>All Schedules</span>
                   </button>
                   
                   <Link
                     to="/routes"
                     onClick={handleLinkClick}
-                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all text-sm font-medium"
+                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all duration-200 text-sm font-medium group hover:scale-[1.02] hover:shadow-sm"
                   >
-                    <Map className="h-4 w-4" />
+                    <Map className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
                     <span>Route Maps</span>
                   </Link>
                 </div>
                 
-                {/* Authentication Section - Auto-close on click */}
+                {/* Authentication Section - Enhanced with Hover Effects */}
                 <div className="pt-3 border-t border-gray-200">
                   {user && userProfile ? (
                     <div className="space-y-2">
@@ -393,7 +486,7 @@ const Navbar: React.FC = () => {
                       <Link
                         to={getDashboardRoute()}
                         onClick={handleLinkClick}
-                        className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg text-sm"
+                        className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl text-sm hover:scale-[1.02]"
                       >
                         <User className="h-4 w-4" />
                         <span>Go to Dashboard</span>
@@ -402,7 +495,7 @@ const Navbar: React.FC = () => {
                       {/* Logout Button */}
                       <button
                         onClick={handleLogout}
-                        className="flex items-center justify-center space-x-2 w-full px-4 py-2.5 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-all border border-red-200 text-sm"
+                        className="flex items-center justify-center space-x-2 w-full px-4 py-2.5 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-all duration-200 border border-red-200 text-sm hover:scale-[1.02] hover:shadow-sm"
                       >
                         <LogOut className="h-4 w-4" />
                         <span>Logout</span>
@@ -416,12 +509,12 @@ const Navbar: React.FC = () => {
                         <p className="text-xs text-gray-600">Login or create account for personalized features</p>
                       </div>
 
-                      {/* Authentication Buttons - Auto-close on click */}
+                      {/* Authentication Buttons - Enhanced with Hover Effects */}
                       <div className="space-y-2">
                         <Link
                           to="/login"
                           onClick={handleLinkClick}
-                          className="flex items-center justify-center space-x-2 w-full px-4 py-2.5 bg-white text-blue-600 rounded-xl font-medium hover:bg-blue-50 transition-all shadow-sm border border-blue-200 text-sm"
+                          className="flex items-center justify-center space-x-2 w-full px-4 py-2.5 bg-white text-blue-600 rounded-xl font-medium hover:bg-blue-50 transition-all duration-200 shadow-sm border border-blue-200 text-sm hover:scale-[1.02] hover:shadow-md"
                         >
                           <User className="h-4 w-4" />
                           <span>Login</span>
@@ -430,14 +523,14 @@ const Navbar: React.FC = () => {
                         <Link
                           to="/signup"
                           onClick={handleLinkClick}
-                          className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg text-sm"
+                          className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl text-sm hover:scale-[1.02]"
                         >
                           <span>Sign Up</span>
                         </Link>
                       </div>
 
                       {/* Benefits List - Compact */}
-                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200 hover:shadow-sm transition-all duration-200">
                         <h4 className="font-semibold text-green-900 mb-1 text-xs">📋 Account Benefits:</h4>
                         <ul className="text-xs text-green-700 space-y-0.5">
                           <li>• Personalized schedules</li>
@@ -449,10 +542,11 @@ const Navbar: React.FC = () => {
                   )}
                 </div>
 
-                {/* Close Menu Hint */}
+                {/* Enhanced Close Menu Hint */}
                 <div className="pt-2 border-t border-gray-200">
-                  <p className="text-center text-xs text-gray-500">
-                    Tap outside or press ESC to close menu
+                  <p className="text-center text-xs text-gray-500 flex items-center justify-center space-x-2">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                    <span>Hover away or tap outside to close</span>
                   </p>
                 </div>
               </div>
