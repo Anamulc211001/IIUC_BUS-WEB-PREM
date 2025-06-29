@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Map, Navigation, Bus, Clock, MapPin, Route, Eye, Maximize2, AlertCircle, ExternalLink } from 'lucide-react';
+import { Globe, Navigation, Bus, Clock, MapPin, Route, Eye, Maximize2, CheckCircle, Star } from 'lucide-react';
 import { BusSchedule } from '../types/BusSchedule';
 import RouteMapModal from './RouteMapModal';
 
@@ -41,19 +41,22 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-3">
-              <Map className="h-6 w-6 text-white" />
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-3">
+              <Globe className="h-6 w-6 text-white" />
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Route Visualization</h2>
-              <p className="text-gray-600 text-sm sm:text-base">Interactive maps and route information</p>
+              <p className="text-gray-600 text-sm sm:text-base flex items-center space-x-2">
+                <Star className="h-3 w-3 text-green-500" />
+                <span>Free interactive maps with OpenStreetMap</span>
+              </p>
             </div>
           </div>
           
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <button
               onClick={openAllRoutesMap}
-              className="flex items-center justify-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
+              className="flex items-center justify-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
               <Maximize2 className="h-4 w-4 sm:h-5 sm:w-5" />
               <span>View All Routes</span>
@@ -61,22 +64,33 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({
           </div>
         </div>
 
-        {/* Setup Notice */}
-        <div className="mb-6 bg-blue-50 rounded-xl p-4 border border-blue-200">
+        {/* Free Maps Benefits */}
+        <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
           <div className="flex items-start space-x-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-800">
-              <p className="font-semibold mb-1">Google Maps Integration</p>
-              <p className="mb-2">To enable interactive maps, you'll need to set up a Google Maps API key.</p>
-              <a 
-                href="https://console.cloud.google.com/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-flex items-center space-x-1 text-blue-600 hover:text-blue-700 font-medium"
-              >
-                <span>Get API Key</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
+            <Globe className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-green-800">
+              <p className="font-semibold mb-1">🎉 Free & Open Source Mapping</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mb-2">
+                <div className="flex items-center space-x-1">
+                  <CheckCircle className="h-3 w-3 text-green-600" />
+                  <span className="text-xs">No API keys required</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <CheckCircle className="h-3 w-3 text-green-600" />
+                  <span className="text-xs">Works immediately</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <CheckCircle className="h-3 w-3 text-green-600" />
+                  <span className="text-xs">Interactive zoom & pan</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <CheckCircle className="h-3 w-3 text-green-600" />
+                  <span className="text-xs">Multiple map layers</span>
+                </div>
+              </div>
+              <p className="text-xs text-green-600 font-medium">
+                🌍 Powered by OpenStreetMap contributors worldwide
+              </p>
             </div>
           </div>
         </div>
@@ -114,10 +128,10 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({
           <div key={startingPoint} className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
             
             {/* Card Header */}
-            <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-4 border-b border-gray-200">
+            <div className="bg-gradient-to-r from-gray-50 to-green-50 p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3 min-w-0 flex-1">
-                  <div className="bg-blue-500 rounded-lg p-2 flex-shrink-0">
+                  <div className="bg-green-500 rounded-lg p-2 flex-shrink-0">
                     <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -128,7 +142,7 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({
                 
                 <button
                   onClick={() => openMapModal(routeSchedules[0])}
-                  className="flex items-center space-x-2 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm flex-shrink-0"
+                  className="flex items-center space-x-2 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm flex-shrink-0"
                 >
                   <Eye className="h-4 w-4" />
                   <span className="hidden sm:inline">View Map</span>
@@ -181,7 +195,7 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({
                 <div className="text-center pt-2">
                   <button
                     onClick={() => openMapModal(routeSchedules[0])}
-                    className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                    className="text-green-600 hover:text-green-700 font-medium text-sm"
                   >
                     View {routeSchedules.length - 3} more routes →
                   </button>

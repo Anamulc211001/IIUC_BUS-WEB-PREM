@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Maximize2, Minimize2, Map, Navigation, Bus, Clock, AlertCircle, Settings } from 'lucide-react';
+import { X, Maximize2, Minimize2, Map, Navigation, Bus, Clock, AlertCircle, Settings, Globe, Star } from 'lucide-react';
 import { BusSchedule } from '../types/BusSchedule';
 import RouteMap from './RouteMap';
 
@@ -19,7 +19,7 @@ const RouteMapModal: React.FC<RouteMapModalProps> = ({
   title
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showSetupHelp, setShowSetupHelp] = useState(false);
+  const [showMapInfo, setShowMapInfo] = useState(false);
 
   if (!isOpen) return null;
 
@@ -42,24 +42,25 @@ const RouteMapModal: React.FC<RouteMapModalProps> = ({
         }`}>
           
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 sm:p-6 flex items-center justify-between flex-shrink-0">
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 sm:p-6 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center space-x-3 min-w-0 flex-1">
               <div className="bg-white/20 rounded-full p-2 flex-shrink-0">
-                <Map className="h-5 w-5 sm:h-6 sm:w-6" />
+                <Globe className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-lg sm:text-xl font-bold truncate">{displayTitle}</h3>
-                <p className="text-blue-100 text-sm">
-                  {schedule ? 'Interactive Route Visualization' : `${schedules.length} Routes Available`}
+                <p className="text-green-100 text-sm flex items-center space-x-2">
+                  <Star className="h-3 w-3" />
+                  <span>Free OpenStreetMap • No API Key Required</span>
                 </p>
               </div>
             </div>
             
             <div className="flex items-center space-x-2 flex-shrink-0">
               <button
-                onClick={() => setShowSetupHelp(!showSetupHelp)}
+                onClick={() => setShowMapInfo(!showMapInfo)}
                 className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                title="Setup Help"
+                title="Map Information"
               >
                 <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
@@ -82,19 +83,23 @@ const RouteMapModal: React.FC<RouteMapModalProps> = ({
             </div>
           </div>
 
-          {/* Setup Help Panel */}
-          {showSetupHelp && (
-            <div className="bg-yellow-50 border-b border-yellow-200 p-4">
+          {/* Map Info Panel */}
+          {showMapInfo && (
+            <div className="bg-green-50 border-b border-green-200 p-4">
               <div className="flex items-start space-x-3">
-                <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-yellow-800">
-                  <p className="font-semibold mb-2">Google Maps Setup Required</p>
+                <Globe className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-green-800">
+                  <p className="font-semibold mb-2">Free & Open Source Mapping</p>
                   <div className="space-y-1 text-xs">
-                    <p>1. Get a Google Maps API key from <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" className="underline">Google Cloud Console</a></p>
-                    <p>2. Enable Maps JavaScript API, Places API, and Geometry API</p>
-                    <p>3. Replace "YOUR_GOOGLE_MAPS_API_KEY" in RouteMap.tsx with your actual key</p>
-                    <p>4. Update the hasApiKey() function to return true</p>
+                    <p>✅ <strong>OpenStreetMap:</strong> Free, open-source mapping data</p>
+                    <p>✅ <strong>No API Keys:</strong> Works immediately without setup</p>
+                    <p>✅ <strong>Interactive:</strong> Zoom, pan, and explore routes</p>
+                    <p>✅ <strong>Multiple Layers:</strong> Street view and satellite imagery</p>
+                    <p>✅ <strong>Real Routes:</strong> Accurate IIUC bus route visualization</p>
                   </div>
+                  <p className="text-xs text-green-600 mt-2 font-medium">
+                    🌍 Powered by OpenStreetMap contributors worldwide
+                  </p>
                 </div>
               </div>
             </div>
@@ -143,19 +148,19 @@ const RouteMapModal: React.FC<RouteMapModalProps> = ({
           <div className="bg-gray-50 border-t border-gray-200 p-3 sm:p-4 flex items-center justify-between text-sm text-gray-600 flex-shrink-0">
             <div className="flex items-center space-x-3 sm:space-x-4">
               <span className="flex items-center space-x-1">
-                <span>🗺️</span>
-                <span className="hidden sm:inline">Interactive Maps</span>
-                <span className="sm:hidden">Maps</span>
+                <Globe className="h-3 w-3 text-green-500" />
+                <span className="hidden sm:inline">Free OpenStreetMap</span>
+                <span className="sm:hidden">Free Maps</span>
               </span>
               <span className="flex items-center space-x-1">
                 <span>📍</span>
-                <span className="hidden sm:inline">Route Visualization</span>
+                <span className="hidden sm:inline">Interactive Routes</span>
                 <span className="sm:hidden">Routes</span>
               </span>
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-xs">Powered by</span>
-              <span className="font-semibold text-blue-600">IIUC Transport</span>
+              <span className="font-semibold text-green-600">OpenStreetMap</span>
             </div>
           </div>
         </div>

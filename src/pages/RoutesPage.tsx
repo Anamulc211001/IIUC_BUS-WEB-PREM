@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Map, Search, Filter, Bus, Clock, MapPin, Navigation, Route, AlertCircle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Map, Search, Filter, Bus, Clock, MapPin, Navigation, Route, Globe, Star, CheckCircle } from 'lucide-react';
 import { busSchedules } from '../data/busSchedules';
 import { useSearch } from '../hooks/useSearch';
 import RouteVisualization from '../components/RouteVisualization';
@@ -44,7 +44,10 @@ const RoutesPage: React.FC = () => {
                 <img src="/iiuc.png" alt="IIUC" className="h-6 w-6 sm:h-8 sm:w-8" />
                 <div>
                   <h1 className="text-lg sm:text-xl font-bold text-gray-900">Route Maps</h1>
-                  <p className="text-xs sm:text-sm text-gray-600">Interactive bus route visualization</p>
+                  <p className="text-xs sm:text-sm text-gray-600 flex items-center space-x-1">
+                    <Globe className="h-3 w-3 text-green-500" />
+                    <span>Free OpenStreetMap</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -54,11 +57,11 @@ const RoutesPage: React.FC = () => {
                 onClick={() => setViewMode('map')}
                 className={`flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 rounded-xl font-medium transition-all text-sm ${
                   viewMode === 'map'
-                    ? 'bg-blue-500 text-white shadow-lg'
+                    ? 'bg-green-500 text-white shadow-lg'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <Map className="h-4 w-4" />
+                <Globe className="h-4 w-4" />
                 <span className="hidden sm:inline">Map View</span>
                 <span className="sm:hidden">Map</span>
               </button>
@@ -152,21 +155,38 @@ const RoutesPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Google Maps Setup Notice */}
+        {/* Free Maps Benefits */}
         {viewMode === 'map' && (
-          <div className="bg-blue-50 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border border-blue-200">
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border border-green-200">
             <div className="flex items-start space-x-3">
-              <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-blue-800">
-                <p className="font-semibold mb-2">Interactive Maps Setup</p>
-                <p className="mb-3">To enable full Google Maps functionality, you'll need to configure an API key:</p>
-                <div className="space-y-1 text-xs mb-3">
-                  <p>1. Get a Google Maps API key from <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" className="underline font-medium">Google Cloud Console</a></p>
-                  <p>2. Enable Maps JavaScript API, Places API, and Geometry API</p>
-                  <p>3. Replace "YOUR_GOOGLE_MAPS_API_KEY" in RouteMap.tsx</p>
-                  <p>4. Update the hasApiKey() function to return true</p>
+              <div className="bg-green-500 rounded-full p-2 flex-shrink-0">
+                <Star className="h-5 w-5 text-white" />
+              </div>
+              <div className="text-sm text-green-800">
+                <p className="font-semibold mb-2 flex items-center space-x-2">
+                  <span>🎉 Free Interactive Maps - No Setup Required!</span>
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-xs">No API keys needed</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-xs">Completely free to use</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-xs">Interactive zoom & pan</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-xs">Multiple map layers</span>
+                  </div>
                 </div>
-                <p className="text-xs text-blue-600">Currently showing fallback route information with static visualization.</p>
+                <p className="text-xs text-green-600 font-medium">
+                  🌍 Powered by OpenStreetMap - the free, editable map of the world
+                </p>
               </div>
             </div>
           </div>
@@ -179,7 +199,7 @@ const RoutesPage: React.FC = () => {
           <div className="space-y-6">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6">
               <div className="flex items-center space-x-3 mb-6">
-                <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-3">
+                <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-3">
                   <Bus className="h-6 w-6 text-white" />
                 </div>
                 <div>
