@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Bus, Lock, User, Eye, EyeOff, AlertCircle, Loader2, Mail, CheckCircle, Wifi, WifiOff, ArrowLeft, Sparkles } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { Bus, Lock, User, Eye, EyeOff, AlertCircle, Loader2, Mail, CheckCircle, Wifi, WifiOff, ArrowLeft, Sparkles, Key } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
   const { signIn, user, userProfile, loading } = useAuth();
@@ -12,6 +13,11 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
+  const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState('');
+  const [forgotPasswordError, setForgotPasswordError] = useState('');
 
   // Show loading spinner while auth is initializing
   if (loading) {
@@ -86,6 +92,52 @@ const LoginPage: React.FC = () => {
     setIsLoading(false);
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotPasswordError('');
+    setForgotPasswordSuccess('');
+    setForgotPasswordLoading(true);
+
+    if (!forgotPasswordEmail.trim()) {
+      setForgotPasswordError('Please enter your email address');
+      setForgotPasswordLoading(false);
+      return;
+    }
+
+    // Check for valid email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(forgotPasswordEmail)) {
+      setForgotPasswordError('Please enter a valid email address');
+      setForgotPasswordLoading(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+        redirectTo: `${window.location.origin}/login?reset=true`,
+      });
+
+      if (error) {
+        console.error('Password reset error:', error);
+        if (error.message?.includes('rate limit')) {
+          setForgotPasswordError('Too many requests. Please wait a few minutes before trying again.');
+        } else if (error.message?.includes('not found')) {
+          setForgotPasswordError('No account found with this email address.');
+        } else {
+          setForgotPasswordError('Failed to send reset email. Please try again.');
+        }
+      } else {
+        setForgotPasswordSuccess(`Password reset instructions have been sent to ${forgotPasswordEmail}. Please check your email and follow the instructions.`);
+        setForgotPasswordEmail('');
+      }
+    } catch (err: any) {
+      console.error('Unexpected error:', err);
+      setForgotPasswordError('An unexpected error occurred. Please try again.');
+    }
+
+    setForgotPasswordLoading(false);
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -141,146 +193,259 @@ const LoginPage: React.FC = () => {
               
               {/* Title - Mobile Responsive */}
               <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-2">
-                Welcome Back
+                {showForgotPassword ? 'Reset Password' : 'Welcome Back'}
               </h1>
-              <p className="text-gray-600 text-sm sm:text-base px-2">Sign in to access your IIUC Bus Dashboard</p>
+              <p className="text-gray-600 text-sm sm:text-base px-2">
+                {showForgotPassword ? 'Enter your email to reset your password' : 'Sign in to access your IIUC Bus Dashboard'}
+              </p>
             </div>
 
-            {/* Login Form - Mobile-First Design */}
+            {/* Login/Forgot Password Form - Mobile-First Design */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-xl border border-gray-200/50 p-6 sm:p-8 mb-6">
-              <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
-                
-                {/* Error Message - Mobile Optimized */}
-                {error && (
-                  <div className="space-y-3">
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-3 sm:p-4 flex items-start space-x-3">
-                      <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                      <p className="text-red-700 text-sm leading-relaxed">{error}</p>
+              
+              {!showForgotPassword ? (
+                // Login Form
+                <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+                  
+                  {/* Error Message - Mobile Optimized */}
+                  {error && (
+                    <div className="space-y-3">
+                      <div className="bg-red-50 border border-red-200 rounded-xl p-3 sm:p-4 flex items-start space-x-3">
+                        <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <p className="text-red-700 text-sm leading-relaxed">{error}</p>
+                      </div>
+                      
+                      {/* Connection issue help - Mobile Friendly */}
+                      {error.includes('timeout') && (
+                        <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 sm:p-4 flex items-start space-x-3">
+                          <WifiOff className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                          <div className="text-sm text-orange-700">
+                            <p className="font-medium mb-1">Connection Issue</p>
+                            <p className="text-xs sm:text-sm">Please check your internet connection and try again.</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Email verification reminder - Mobile Friendly */}
+                      {error.includes('confirmation') && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4 flex items-start space-x-3">
+                          <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                          <div className="text-sm text-blue-700">
+                            <p className="font-medium mb-1">Email Verification Required</p>
+                            <p className="text-xs sm:text-sm">Please check your email and click the verification link.</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    
-                    {/* Connection issue help - Mobile Friendly */}
-                    {error.includes('timeout') && (
-                      <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 sm:p-4 flex items-start space-x-3">
-                        <WifiOff className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500 flex-shrink-0 mt-0.5" />
-                        <div className="text-sm text-orange-700">
-                          <p className="font-medium mb-1">Connection Issue</p>
-                          <p className="text-xs sm:text-sm">Please check your internet connection and try again.</p>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Email verification reminder - Mobile Friendly */}
-                    {error.includes('confirmation') && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4 flex items-start space-x-3">
-                        <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                        <div className="text-sm text-blue-700">
-                          <p className="font-medium mb-1">Email Verification Required</p>
-                          <p className="text-xs sm:text-sm">Please check your email and click the verification link.</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  )}
 
-                {/* Identifier Field - Mobile Optimized */}
-                <div>
-                  <label htmlFor="identifier" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Email or University ID
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                    <input
-                      type="text"
-                      id="identifier"
-                      name="identifier"
-                      value={formData.identifier}
-                      onChange={handleChange}
-                      placeholder="Enter your email or university ID"
-                      className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500 text-base form-input"
-                      required
-                      disabled={isLoading}
-                      autoComplete="username"
-                      autoCapitalize="none"
-                      autoCorrect="off"
-                    />
+                  {/* Identifier Field - Mobile Optimized */}
+                  <div>
+                    <label htmlFor="identifier" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Email or University ID
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                      <input
+                        type="text"
+                        id="identifier"
+                        name="identifier"
+                        value={formData.identifier}
+                        onChange={handleChange}
+                        placeholder="Enter your email or university ID"
+                        className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500 text-base form-input"
+                        required
+                        disabled={isLoading}
+                        autoComplete="username"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {/* Password Field - Mobile Optimized */}
-                <div>
-                  <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      id="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Enter your password"
-                      className="w-full pl-10 sm:pl-12 pr-12 sm:pr-14 py-3 sm:py-4 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500 text-base form-input"
-                      required
-                      disabled={isLoading}
-                      autoComplete="current-password"
-                    />
+                  {/* Password Field - Mobile Optimized */}
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        id="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="Enter your password"
+                        className="w-full pl-10 sm:pl-12 pr-12 sm:pr-14 py-3 sm:py-4 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500 text-base form-input"
+                        required
+                        disabled={isLoading}
+                        autoComplete="current-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                        disabled={isLoading}
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Forgot Password Link */}
+                  <div className="text-right">
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
-                      disabled={isLoading}
-                      tabIndex={-1}
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors flex items-center space-x-1 ml-auto"
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
+                      <Key className="h-3 w-3" />
+                      <span>Forgot Password?</span>
                     </button>
                   </div>
-                </div>
 
-                {/* Submit Button - Mobile Optimized */}
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 sm:py-4 px-6 rounded-xl sm:rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-base button-smooth"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                      <span>Signing In...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Sign In</span>
-                      <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
-                    </>
+                  {/* Submit Button - Mobile Optimized */}
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 sm:py-4 px-6 rounded-xl sm:rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-base button-smooth"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                        <span>Signing In...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Sign In</span>
+                        <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
+                      </>
+                    )}
+                  </button>
+                </form>
+              ) : (
+                // Forgot Password Form
+                <form onSubmit={handleForgotPassword} className="space-y-5 sm:space-y-6">
+                  
+                  {/* Success Message */}
+                  {forgotPasswordSuccess && (
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4 flex items-start space-x-3">
+                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-green-700">
+                        <p className="font-medium mb-1">Reset Email Sent!</p>
+                        <p className="text-xs sm:text-sm leading-relaxed">{forgotPasswordSuccess}</p>
+                      </div>
+                    </div>
                   )}
-                </button>
-              </form>
+
+                  {/* Error Message */}
+                  {forgotPasswordError && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-3 sm:p-4 flex items-start space-x-3">
+                      <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                      <p className="text-red-700 text-sm leading-relaxed">{forgotPasswordError}</p>
+                    </div>
+                  )}
+
+                  {/* Email Field */}
+                  <div>
+                    <label htmlFor="forgotPasswordEmail" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                      <input
+                        type="email"
+                        id="forgotPasswordEmail"
+                        value={forgotPasswordEmail}
+                        onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                        placeholder="Enter your email address"
+                        className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500 text-base form-input"
+                        required
+                        disabled={forgotPasswordLoading}
+                        autoComplete="email"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Info Box */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4">
+                    <div className="flex items-start space-x-3">
+                      <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-blue-700">
+                        <p className="font-medium mb-1">Password Reset Instructions</p>
+                        <p className="text-xs sm:text-sm">We'll send you a secure link to reset your password. Check your email and follow the instructions.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={forgotPasswordLoading}
+                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 sm:py-4 px-6 rounded-xl sm:rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-base button-smooth"
+                  >
+                    {forgotPasswordLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                        <span>Sending Reset Email...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Mail className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span>Send Reset Email</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Back to Login */}
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowForgotPassword(false);
+                        setForgotPasswordEmail('');
+                        setForgotPasswordError('');
+                        setForgotPasswordSuccess('');
+                      }}
+                      className="text-gray-600 hover:text-gray-700 font-medium text-sm transition-colors flex items-center space-x-1 mx-auto"
+                    >
+                      <ArrowLeft className="h-3 w-3" />
+                      <span>Back to Login</span>
+                    </button>
+                  </div>
+                </form>
+              )}
 
               {/* Sign Up Link - Mobile Friendly */}
-              <div className="mt-6 text-center">
-                <p className="text-gray-600 text-sm">
-                  Don't have an account?{' '}
-                  <Link
-                    to="/signup"
-                    className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
-                  >
-                    Sign up here
-                  </Link>
-                </p>
-              </div>
+              {!showForgotPassword && (
+                <div className="mt-6 text-center">
+                  <p className="text-gray-600 text-sm">
+                    Don't have an account?{' '}
+                    <Link
+                      to="/signup"
+                      className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+                    >
+                      Sign up here
+                    </Link>
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Success Notice - Mobile Optimized */}
-            <div className="bg-green-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-green-200 mb-6">
-              <div className="flex items-start space-x-3">
-                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-green-700">
-                  <p className="font-semibold mb-1">Just Verified Your Email?</p>
-                  <p className="text-xs sm:text-sm">Perfect! You can now sign in with your credentials.</p>
+            {!showForgotPassword && (
+              <div className="bg-green-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-green-200 mb-6">
+                <div className="flex items-start space-x-3">
+                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-green-700">
+                    <p className="font-semibold mb-1">Just Verified Your Email?</p>
+                    <p className="text-xs sm:text-sm">Perfect! You can now sign in with your credentials.</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Connection Status - Mobile Friendly */}
             <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
