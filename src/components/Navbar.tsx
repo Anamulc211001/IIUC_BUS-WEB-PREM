@@ -218,7 +218,7 @@ const Navbar: React.FC = () => {
             </Link>
           </div>
 
-          {/* Right Side Actions - Completely Redesigned for Mobile */}
+          {/* Right Side Actions - FIXED: Consistent Button Sizes */}
           <div className="flex items-center space-x-2 sm:space-x-3">
             
             {/* Desktop User Authentication Section */}
@@ -286,22 +286,22 @@ const Navbar: React.FC = () => {
               <span>Contact</span>
             </a>
 
-            {/* Mobile Contact Button - Compact */}
+            {/* FIXED: Mobile Contact Button - Matching Size with Menu Button */}
             <a
               href="tel:+880-31-2510500"
-              className={`lg:hidden p-2.5 rounded-xl transition-all shadow-md ${
+              className={`lg:hidden w-11 h-11 rounded-xl transition-all shadow-md border flex items-center justify-center ${
                 isScrolled 
-                  ? 'text-gray-700 hover:bg-gray-100 border border-gray-200' 
-                  : 'text-white hover:bg-white/10 border border-white/20'
+                  ? 'text-gray-700 hover:bg-gray-100 border-gray-200' 
+                  : 'text-white hover:bg-white/10 border-white/20'
               }`}
             >
-              <Phone className="h-4 w-4" />
+              <Phone className="h-5 w-5" />
             </a>
 
-            {/* Mobile Menu Button - Enhanced with User Indicator */}
+            {/* FIXED: Mobile Menu Button - Consistent Size */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`lg:hidden relative p-2.5 rounded-xl transition-all shadow-md border ${
+              className={`lg:hidden relative w-11 h-11 rounded-xl transition-all shadow-md border flex items-center justify-center ${
                 isScrolled 
                   ? 'text-gray-700 hover:bg-gray-100 border-gray-200' 
                   : 'text-white hover:bg-white/10 border-white/20'
