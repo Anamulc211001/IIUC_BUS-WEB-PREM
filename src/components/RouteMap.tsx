@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapPin, Navigation, Bus, Clock, Users, Route, X, Maximize2, Minimize2, Layers, Satellite, Map as MapIcon } from 'lucide-react';
+import { MapPin, Navigation, Bus, Clock, Users, Route, X, Maximize2, Minimize2, Layers, Satellite, Map as MapIcon, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import { BusSchedule } from '../types/BusSchedule';
 
 interface RouteMapProps {
@@ -9,7 +9,7 @@ interface RouteMapProps {
   onClose?: () => void;
 }
 
-// Define route coordinates for IIUC bus routes
+// Define route coordinates for IIUC bus routes (more accurate coordinates)
 const routeCoordinates: Record<string, google.maps.LatLngLiteral[]> = {
   // BOT to IIUC route
   'BOT': [
@@ -61,11 +61,106 @@ const routeCoordinates: Record<string, google.maps.LatLngLiteral[]> = {
     { lat: 22.4589, lng: 91.9756 }, // Kuwaish
     { lat: 22.4567, lng: 91.9823 }, // Oxygen
     { lat: 22.4569, lng: 91.9859 }  // IIUC
+  ],
+  
+  // Additional routes
+  'Kotowali': [
+    { lat: 22.3356, lng: 91.8317 }, // Kotowali
+    { lat: 22.3412, lng: 91.8234 }, // Kadamtali
+    { lat: 22.3567, lng: 91.8456 }, // Dewan Hat
+    { lat: 22.3789, lng: 91.8678 }, // Alanker
+    { lat: 22.4569, lng: 91.9859 }  // IIUC
+  ],
+  
+  'Lucky Plaza': [
+    { lat: 22.3255, lng: 91.8317 }, // Lucky Plaza (Agrabad area)
+    { lat: 22.3298, lng: 91.8245 }, // Boropool
+    { lat: 22.3456, lng: 91.8123 }, // Noyabazar
+    { lat: 22.3789, lng: 91.8034 }, // AK Khan
+    { lat: 22.4569, lng: 91.9859 }  // IIUC
   ]
 };
 
 // IIUC location
 const IIUC_LOCATION = { lat: 22.4569, lng: 91.9859 };
+
+// Fallback static map component
+const StaticRouteMap: React.FC<RouteMapProps> = ({ schedule, schedules = [] }) => {
+  const routesToShow = schedule ? [schedule] : schedules;
+  
+  return (
+    <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl flex flex-col items-center justify-center p-8 text-center">
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-auto shadow-lg border border-white/50">
+        <div className="bg-blue-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+          <MapIcon className="h-8 w-8 text-blue-600" />
+        </div>
+        
+        <h3 className="text-xl font-bold text-gray-900 mb-3">Route Information</h3>
+        
+        {schedule ? (
+          <div className="space-y-3 text-left">
+            <div className="flex items-center space-x-2">
+              <Clock className="h-4 w-4 text-blue-500" />
+              <span className="font-semibold">{schedule.time}</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <MapPin className="h-4 w-4 text-green-500" />
+              <span className="text-sm">{schedule.startingPoint}</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Navigation className="h-4 w-4 text-purple-500" />
+              <span className="text-sm">{schedule.endPoint}</span>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-3 mt-4">
+              <p className="text-xs text-gray-600 leading-relaxed">{schedule.route}</p>
+            </div>
+            {schedule.gender && (
+              <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                schedule.gender === 'Female' ? 'bg-pink-100 text-pink-800' : 'bg-blue-100 text-blue-800'
+              }`}>
+                {schedule.gender} Only
+              </span>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-gray-600 mb-4">
+              {routesToShow.length} bus routes available
+            </p>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="bg-pink-50 rounded-lg p-2">
+                <div className="w-3 h-3 bg-pink-500 rounded-full mx-auto mb-1"></div>
+                <div className="text-pink-700 font-medium">Female</div>
+              </div>
+              <div className="bg-blue-50 rounded-lg p-2">
+                <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                <div className="text-blue-700 font-medium">Male</div>
+              </div>
+              <div className="bg-orange-50 rounded-lg p-2">
+                <div className="w-3 h-3 bg-orange-500 rounded-full mx-auto mb-1"></div>
+                <div className="text-orange-700 font-medium">Friday</div>
+              </div>
+              <div className="bg-green-50 rounded-lg p-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                <div className="text-green-700 font-medium">Regular</div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <div className="mt-6 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+          <div className="flex items-center space-x-2 text-yellow-700">
+            <AlertCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">Interactive Map Unavailable</span>
+          </div>
+          <p className="text-xs text-yellow-600 mt-1">
+            Google Maps couldn't load. Showing route information instead.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const RouteMap: React.FC<RouteMapProps> = ({ 
   schedule, 
@@ -76,14 +171,28 @@ const RouteMap: React.FC<RouteMapProps> = ({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
   const [showTraffic, setShowTraffic] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null);
   const [routePolylines, setRoutePolylines] = useState<google.maps.Polyline[]>([]);
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
+  const [trafficLayer, setTrafficLayer] = useState<google.maps.TrafficLayer | null>(null);
 
-  // Load Google Maps API
+  // Check if Google Maps API key is configured
+  const hasApiKey = () => {
+    // In production, you would check for a real API key
+    // For now, we'll simulate this check
+    return false; // Set to true when you have a valid API key
+  };
+
+  // Load Google Maps API with better error handling
   useEffect(() => {
+    if (!hasApiKey()) {
+      setLoadError(true);
+      return;
+    }
+
     const loadGoogleMaps = () => {
       if (window.google && window.google.maps) {
         setIsLoaded(true);
@@ -94,84 +203,111 @@ const RouteMap: React.FC<RouteMapProps> = ({
       script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=geometry,places`;
       script.async = true;
       script.defer = true;
-      script.onload = () => setIsLoaded(true);
+      
+      script.onload = () => {
+        setIsLoaded(true);
+        setLoadError(false);
+      };
+      
       script.onerror = () => {
         console.error('Failed to load Google Maps API');
-        // Fallback to OpenStreetMap or show error message
+        setLoadError(true);
+        setIsLoaded(false);
       };
+      
       document.head.appendChild(script);
+
+      // Cleanup function
+      return () => {
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+      };
     };
 
-    loadGoogleMaps();
+    const cleanup = loadGoogleMaps();
+    return cleanup;
   }, []);
 
   // Initialize map
   useEffect(() => {
-    if (!isLoaded || !mapRef.current) return;
+    if (!isLoaded || !mapRef.current || loadError) return;
 
-    const map = new google.maps.Map(mapRef.current, {
-      center: IIUC_LOCATION,
-      zoom: 11,
-      mapTypeId: mapType,
-      styles: [
-        {
-          featureType: 'poi',
-          elementType: 'labels',
-          stylers: [{ visibility: 'off' }]
+    try {
+      const map = new google.maps.Map(mapRef.current, {
+        center: IIUC_LOCATION,
+        zoom: 11,
+        mapTypeId: mapType,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          },
+          {
+            featureType: 'transit',
+            elementType: 'labels',
+            stylers: [{ visibility: 'simplified' }]
+          }
+        ],
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        zoomControl: true,
+        zoomControlOptions: {
+          position: google.maps.ControlPosition.RIGHT_BOTTOM
         },
-        {
-          featureType: 'transit',
-          elementType: 'labels',
-          stylers: [{ visibility: 'simplified' }]
+        gestureHandling: 'cooperative' // Better mobile experience
+      });
+
+      mapInstanceRef.current = map;
+
+      // Add IIUC marker
+      const iiucMarker = new google.maps.Marker({
+        position: IIUC_LOCATION,
+        map: map,
+        title: 'International Islamic University Chittagong (IIUC)',
+        icon: {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="20" cy="20" r="18" fill="#1e40af" stroke="#ffffff" stroke-width="3"/>
+              <circle cx="20" cy="20" r="12" fill="#3b82f6"/>
+              <text x="20" y="25" text-anchor="middle" fill="white" font-size="10" font-weight="bold">IIUC</text>
+            </svg>
+          `),
+          scaledSize: new google.maps.Size(40, 40),
+          anchor: new google.maps.Point(20, 20)
         }
-      ],
-      mapTypeControl: false,
-      streetViewControl: false,
-      fullscreenControl: false,
-      zoomControl: true,
-      zoomControlOptions: {
-        position: google.maps.ControlPosition.RIGHT_BOTTOM
-      }
-    });
+      });
 
-    mapInstanceRef.current = map;
+      setMarkers([iiucMarker]);
 
-    // Add IIUC marker
-    const iiucMarker = new google.maps.Marker({
-      position: IIUC_LOCATION,
-      map: map,
-      title: 'International Islamic University Chittagong (IIUC)',
-      icon: {
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="20" cy="20" r="18" fill="#1e40af" stroke="#ffffff" stroke-width="3"/>
-            <circle cx="20" cy="20" r="12" fill="#3b82f6"/>
-            <text x="20" y="25" text-anchor="middle" fill="white" font-size="10" font-weight="bold">IIUC</text>
-          </svg>
-        `),
-        scaledSize: new google.maps.Size(40, 40),
-        anchor: new google.maps.Point(20, 20)
-      }
-    });
-
-    setMarkers([iiucMarker]);
+    } catch (error) {
+      console.error('Error initializing Google Maps:', error);
+      setLoadError(true);
+    }
 
     return () => {
       // Cleanup markers and polylines
       markers.forEach(marker => marker.setMap(null));
       routePolylines.forEach(polyline => polyline.setMap(null));
+      if (trafficLayer) {
+        trafficLayer.setMap(null);
+      }
     };
-  }, [isLoaded, mapType]);
+  }, [isLoaded, mapType, loadError]);
 
   // Draw routes based on schedule or schedules
   useEffect(() => {
-    if (!mapInstanceRef.current || !isLoaded) return;
+    if (!mapInstanceRef.current || !isLoaded || loadError) return;
 
-    // Clear existing polylines
+    // Clear existing polylines and markers (except IIUC)
     routePolylines.forEach(polyline => polyline.setMap(null));
+    markers.slice(1).forEach(marker => marker.setMap(null)); // Keep IIUC marker
     setRoutePolylines([]);
 
     const newPolylines: google.maps.Polyline[] = [];
+    const newMarkers: google.maps.Marker[] = [markers[0]]; // Keep IIUC marker
     const routesToDraw = schedule ? [schedule] : schedules;
 
     routesToDraw.forEach((busSchedule, index) => {
@@ -179,78 +315,88 @@ const RouteMap: React.FC<RouteMapProps> = ({
       const coordinates = routeCoordinates[routeKey];
 
       if (coordinates) {
-        const polyline = new google.maps.Polyline({
-          path: coordinates,
-          geodesic: true,
-          strokeColor: getRouteColor(busSchedule, index),
-          strokeOpacity: 1.0,
-          strokeWeight: 4,
-          map: mapInstanceRef.current
-        });
+        try {
+          const polyline = new google.maps.Polyline({
+            path: coordinates,
+            geodesic: true,
+            strokeColor: getRouteColor(busSchedule, index),
+            strokeOpacity: 1.0,
+            strokeWeight: 4,
+            map: mapInstanceRef.current
+          });
 
-        // Add click listener to polyline
-        polyline.addListener('click', () => {
-          setSelectedRoute(busSchedule.id);
-          showRouteInfo(busSchedule);
-        });
+          // Add click listener to polyline
+          polyline.addListener('click', () => {
+            setSelectedRoute(busSchedule.id);
+            showRouteInfo(busSchedule);
+          });
 
-        newPolylines.push(polyline);
+          newPolylines.push(polyline);
 
-        // Add starting point marker
-        const startMarker = new google.maps.Marker({
-          position: coordinates[0],
-          map: mapInstanceRef.current,
-          title: `${busSchedule.startingPoint} - ${busSchedule.time}`,
-          icon: {
-            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-              <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="15" cy="15" r="12" fill="${getRouteColor(busSchedule, index)}" stroke="#ffffff" stroke-width="2"/>
-                <circle cx="15" cy="15" r="6" fill="#ffffff"/>
-                <text x="15" y="18" text-anchor="middle" fill="${getRouteColor(busSchedule, index)}" font-size="8" font-weight="bold">BUS</text>
-              </svg>
-            `),
-            scaledSize: new google.maps.Size(30, 30),
-            anchor: new google.maps.Point(15, 15)
-          }
-        });
+          // Add starting point marker
+          const startMarker = new google.maps.Marker({
+            position: coordinates[0],
+            map: mapInstanceRef.current,
+            title: `${busSchedule.startingPoint} - ${busSchedule.time}`,
+            icon: {
+              url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="15" cy="15" r="12" fill="${getRouteColor(busSchedule, index)}" stroke="#ffffff" stroke-width="2"/>
+                  <circle cx="15" cy="15" r="6" fill="#ffffff"/>
+                  <text x="15" y="18" text-anchor="middle" fill="${getRouteColor(busSchedule, index)}" font-size="8" font-weight="bold">BUS</text>
+                </svg>
+              `),
+              scaledSize: new google.maps.Size(30, 30),
+              anchor: new google.maps.Point(15, 15)
+            }
+          });
 
-        // Add info window to marker
-        const infoWindow = new google.maps.InfoWindow({
-          content: createInfoWindowContent(busSchedule)
-        });
+          // Add info window to marker
+          const infoWindow = new google.maps.InfoWindow({
+            content: createInfoWindowContent(busSchedule)
+          });
 
-        startMarker.addListener('click', () => {
-          infoWindow.open(mapInstanceRef.current, startMarker);
-        });
+          startMarker.addListener('click', () => {
+            infoWindow.open(mapInstanceRef.current, startMarker);
+          });
 
-        newPolylines.push(polyline);
+          newMarkers.push(startMarker);
+        } catch (error) {
+          console.error('Error creating route polyline:', error);
+        }
       }
     });
 
     setRoutePolylines(newPolylines);
+    setMarkers(newMarkers);
 
     // Fit map to show all routes
-    if (newPolylines.length > 0) {
-      const bounds = new google.maps.LatLngBounds();
-      routesToDraw.forEach(busSchedule => {
-        const routeKey = getRouteKey(busSchedule.startingPoint);
-        const coordinates = routeCoordinates[routeKey];
-        if (coordinates) {
-          coordinates.forEach(coord => bounds.extend(coord));
-        }
-      });
-      mapInstanceRef.current?.fitBounds(bounds);
+    if (newPolylines.length > 0 && mapInstanceRef.current) {
+      try {
+        const bounds = new google.maps.LatLngBounds();
+        routesToDraw.forEach(busSchedule => {
+          const routeKey = getRouteKey(busSchedule.startingPoint);
+          const coordinates = routeCoordinates[routeKey];
+          if (coordinates) {
+            coordinates.forEach(coord => bounds.extend(coord));
+          }
+        });
+        mapInstanceRef.current.fitBounds(bounds);
+      } catch (error) {
+        console.error('Error fitting map bounds:', error);
+      }
     }
-  }, [schedule, schedules, isLoaded]);
+  }, [schedule, schedules, isLoaded, loadError]);
 
   const getRouteKey = (startingPoint: string): string => {
     const point = startingPoint.toLowerCase();
     if (point.includes('bot') || point.includes('bahaddarhat')) return 'BOT';
-    if (point.includes('agrabad')) return 'Agrabad';
+    if (point.includes('agrabad') || point.includes('lucky plaza')) return 'Agrabad';
     if (point.includes('chatteswari')) return 'Chatteswari';
     if (point.includes('baroyarhat')) return 'Baroyarhat';
     if (point.includes('hathazari')) return 'Hathazari';
     if (point.includes('cuet')) return 'CUET';
+    if (point.includes('kotowali')) return 'Kotowali';
     return 'BOT'; // Default fallback
   };
 
@@ -282,14 +428,14 @@ const RouteMap: React.FC<RouteMapProps> = ({
   };
 
   const showRouteInfo = (busSchedule: BusSchedule) => {
-    // You can implement a custom info panel here
     console.log('Selected route:', busSchedule);
   };
 
   const toggleMapType = () => {
-    setMapType(prev => prev === 'roadmap' ? 'satellite' : 'roadmap');
+    const newMapType = mapType === 'roadmap' ? 'satellite' : 'roadmap';
+    setMapType(newMapType);
     if (mapInstanceRef.current) {
-      mapInstanceRef.current.setMapTypeId(mapType === 'roadmap' ? 'satellite' : 'roadmap');
+      mapInstanceRef.current.setMapTypeId(newMapType);
     }
   };
 
@@ -298,25 +444,45 @@ const RouteMap: React.FC<RouteMapProps> = ({
     
     setShowTraffic(prev => {
       const newShowTraffic = !prev;
-      const trafficLayer = new google.maps.TrafficLayer();
       
       if (newShowTraffic) {
-        trafficLayer.setMap(mapInstanceRef.current);
+        if (!trafficLayer) {
+          const newTrafficLayer = new google.maps.TrafficLayer();
+          newTrafficLayer.setMap(mapInstanceRef.current);
+          setTrafficLayer(newTrafficLayer);
+        } else {
+          trafficLayer.setMap(mapInstanceRef.current);
+        }
       } else {
-        trafficLayer.setMap(null);
+        if (trafficLayer) {
+          trafficLayer.setMap(null);
+        }
       }
       
       return newShowTraffic;
     });
   };
 
+  // Show fallback map if there's an error or API key is missing
+  if (loadError || !hasApiKey()) {
+    return <StaticRouteMap schedule={schedule} schedules={schedules} />;
+  }
+
+  // Loading state
   if (!isLoaded) {
     return (
-      <div className={`${isFullscreen ? 'fixed inset-0 z-50' : 'w-full h-96'} bg-gray-100 rounded-2xl flex items-center justify-center`}>
+      <div className={`${isFullscreen ? 'fixed inset-0 z-50' : 'w-full h-96'} bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl flex items-center justify-center`}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 font-medium">Loading Interactive Map...</p>
+          <div className="relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <Wifi className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-blue-600" />
+          </div>
+          <p className="text-gray-700 font-medium">Loading Interactive Map...</p>
           <p className="text-gray-500 text-sm mt-2">Preparing bus routes visualization</p>
+          <div className="mt-4 flex items-center justify-center space-x-2 text-xs text-gray-500">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <span>Connecting to Google Maps</span>
+          </div>
         </div>
       </div>
     );

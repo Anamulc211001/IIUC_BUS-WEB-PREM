@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Map, Navigation, Bus, Clock, MapPin, Route, Eye, Maximize2 } from 'lucide-react';
+import { Map, Navigation, Bus, Clock, MapPin, Route, Eye, Maximize2, AlertCircle, ExternalLink } from 'lucide-react';
 import { BusSchedule } from '../types/BusSchedule';
 import RouteMapModal from './RouteMapModal';
 
@@ -38,78 +38,101 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3">
             <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-3">
               <Map className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Route Visualization</h2>
-              <p className="text-gray-600">Interactive maps and route information</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Route Visualization</h2>
+              <p className="text-gray-600 text-sm sm:text-base">Interactive maps and route information</p>
             </div>
           </div>
           
-          <button
-            onClick={openAllRoutesMap}
-            className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-          >
-            <Maximize2 className="h-5 w-5" />
-            <span>View All Routes</span>
-          </button>
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+            <button
+              onClick={openAllRoutesMap}
+              className="flex items-center justify-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
+            >
+              <Maximize2 className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span>View All Routes</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Setup Notice */}
+        <div className="mb-6 bg-blue-50 rounded-xl p-4 border border-blue-200">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-800">
+              <p className="font-semibold mb-1">Google Maps Integration</p>
+              <p className="mb-2">To enable interactive maps, you'll need to set up a Google Maps API key.</p>
+              <a 
+                href="https://console.cloud.google.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center space-x-1 text-blue-600 hover:text-blue-700 font-medium"
+              >
+                <span>Get API Key</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          </div>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-blue-50 rounded-xl p-4 text-center">
-            <Route className="h-6 w-6 text-blue-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-blue-600">{Object.keys(groupedRoutes).length}</div>
-            <div className="text-sm text-blue-700">Starting Points</div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-blue-50 rounded-xl p-3 sm:p-4 text-center">
+            <Route className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 mx-auto mb-2" />
+            <div className="text-lg sm:text-2xl font-bold text-blue-600">{Object.keys(groupedRoutes).length}</div>
+            <div className="text-xs sm:text-sm text-blue-700">Starting Points</div>
           </div>
-          <div className="bg-green-50 rounded-xl p-4 text-center">
-            <Bus className="h-6 w-6 text-green-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-green-600">{schedules.length}</div>
-            <div className="text-sm text-green-700">Total Routes</div>
+          <div className="bg-green-50 rounded-xl p-3 sm:p-4 text-center">
+            <Bus className="h-5 w-5 sm:h-6 sm:w-6 text-green-500 mx-auto mb-2" />
+            <div className="text-lg sm:text-2xl font-bold text-green-600">{schedules.length}</div>
+            <div className="text-xs sm:text-sm text-green-700">Total Routes</div>
           </div>
-          <div className="bg-purple-50 rounded-xl p-4 text-center">
-            <Clock className="h-6 w-6 text-purple-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-purple-600">
+          <div className="bg-purple-50 rounded-xl p-3 sm:p-4 text-center">
+            <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500 mx-auto mb-2" />
+            <div className="text-lg sm:text-2xl font-bold text-purple-600">
               {schedules.filter(s => s.scheduleType === 'Friday').length}
             </div>
-            <div className="text-sm text-purple-700">Friday Routes</div>
+            <div className="text-xs sm:text-sm text-purple-700">Friday Routes</div>
           </div>
-          <div className="bg-orange-50 rounded-xl p-4 text-center">
-            <MapPin className="h-6 w-6 text-orange-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-orange-600">15+</div>
-            <div className="text-sm text-orange-700">Areas Covered</div>
+          <div className="bg-orange-50 rounded-xl p-3 sm:p-4 text-center">
+            <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500 mx-auto mb-2" />
+            <div className="text-lg sm:text-2xl font-bold text-orange-600">15+</div>
+            <div className="text-xs sm:text-sm text-orange-700">Areas Covered</div>
           </div>
         </div>
       </div>
 
       {/* Route Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {Object.entries(groupedRoutes).map(([startingPoint, routeSchedules]) => (
           <div key={startingPoint} className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
             
             {/* Card Header */}
             <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-blue-500 rounded-lg p-2">
-                    <MapPin className="h-5 w-5 text-white" />
+                <div className="flex items-center space-x-3 min-w-0 flex-1">
+                  <div className="bg-blue-500 rounded-lg p-2 flex-shrink-0">
+                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900">{startingPoint}</h3>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-bold text-gray-900 truncate">{startingPoint}</h3>
                     <p className="text-sm text-gray-600">{routeSchedules.length} routes available</p>
                   </div>
                 </div>
                 
                 <button
                   onClick={() => openMapModal(routeSchedules[0])}
-                  className="flex items-center space-x-2 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                  className="flex items-center space-x-2 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm flex-shrink-0"
                 >
                   <Eye className="h-4 w-4" />
-                  <span>View Map</span>
+                  <span className="hidden sm:inline">View Map</span>
+                  <span className="sm:hidden">Map</span>
                 </button>
               </div>
             </div>
@@ -122,18 +145,18 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
                   onClick={() => openMapModal(schedule)}
                 >
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
                     <div className="flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-blue-500" />
+                      <Clock className="h-4 w-4 text-blue-500 flex-shrink-0" />
                       <span className="font-semibold text-gray-900">{schedule.time}</span>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Navigation className="h-4 w-4 text-green-500" />
-                      <span className="text-sm text-gray-600">{schedule.endPoint}</span>
+                    <div className="flex items-center space-x-2 min-w-0">
+                      <Navigation className="h-4 w-4 text-green-500 flex-shrink-0" />
+                      <span className="text-sm text-gray-600 truncate">{schedule.endPoint}</span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 flex-shrink-0">
                     {schedule.gender && (
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                         schedule.gender === 'Female' 
