@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Bus, Lock, User, Eye, EyeOff, AlertCircle, Loader2, Mail, CheckCircle, Wifi, WifiOff, ArrowLeft, Sparkles, Key } from 'lucide-react';
+import { Bus, Lock, User, Eye, EyeOff, AlertCircle, Loader2, Mail, CheckCircle, Wifi, WifiOff, ArrowLeft, Sparkles, Key, Info } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
   const { signIn, user, userProfile, loading } = useAuth();
@@ -113,26 +113,62 @@ const LoginPage: React.FC = () => {
     }
 
     try {
+      console.log('🔄 Attempting password reset for:', forgotPasswordEmail);
+      
+      // Check if Supabase is properly configured
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (!supabaseUrl || !supabaseAnonKey || supabaseUrl === 'https://placeholder.supabase.co') {
+        setForgotPasswordError('Email service is not configured. Please contact the administrator.');
+        setForgotPasswordLoading(false);
+        return;
+      }
+
+      // First, check if the email exists in our users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('email')
+        .eq('email', forgotPasswordEmail)
+        .single();
+
+      if (userError || !userData) {
+        console.log('❌ Email not found in users table:', userError);
+        setForgotPasswordError('No account found with this email address. Please check your email or sign up for a new account.');
+        setForgotPasswordLoading(false);
+        return;
+      }
+
+      console.log('✅ Email found in users table, proceeding with reset...');
+
+      // Attempt to send password reset email
       const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
         redirectTo: `${window.location.origin}/login?reset=true`,
       });
 
       if (error) {
-        console.error('Password reset error:', error);
-        if (error.message?.includes('rate limit')) {
-          setForgotPasswordError('Too many requests. Please wait a few minutes before trying again.');
-        } else if (error.message?.includes('not found')) {
-          setForgotPasswordError('No account found with this email address.');
+        console.error('❌ Password reset error:', error);
+        
+        // Handle specific error cases
+        if (error.message?.includes('rate limit') || error.message?.includes('too many')) {
+          setForgotPasswordError('Too many password reset requests. Please wait 5 minutes before trying again.');
+        } else if (error.message?.includes('not found') || error.message?.includes('user not found')) {
+          setForgotPasswordError('No account found with this email address. Please check your email or sign up for a new account.');
+        } else if (error.message?.includes('email not confirmed')) {
+          setForgotPasswordError('Your email address is not verified. Please check your email for the verification link first.');
+        } else if (error.message?.includes('smtp') || error.message?.includes('email')) {
+          setForgotPasswordError('Email service is temporarily unavailable. Please try again later or contact support.');
         } else {
-          setForgotPasswordError('Failed to send reset email. Please try again.');
+          setForgotPasswordError(`Password reset failed: ${error.message}. Please try again or contact support.`);
         }
       } else {
-        setForgotPasswordSuccess(`Password reset instructions have been sent to ${forgotPasswordEmail}. Please check your email and follow the instructions.`);
+        console.log('✅ Password reset email sent successfully');
+        setForgotPasswordSuccess(`Password reset instructions have been sent to ${forgotPasswordEmail}. Please check your email (including spam folder) and follow the instructions. The link will expire in 1 hour.`);
         setForgotPasswordEmail('');
       }
     } catch (err: any) {
-      console.error('Unexpected error:', err);
-      setForgotPasswordError('An unexpected error occurred. Please try again.');
+      console.error('❌ Unexpected password reset error:', err);
+      setForgotPasswordError('An unexpected error occurred. Please check your internet connection and try again.');
     }
 
     setForgotPasswordLoading(false);
@@ -344,7 +380,10 @@ const LoginPage: React.FC = () => {
                   {forgotPasswordError && (
                     <div className="bg-red-50 border border-red-200 rounded-xl p-3 sm:p-4 flex items-start space-x-3">
                       <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                      <p className="text-red-700 text-sm leading-relaxed">{forgotPasswordError}</p>
+                      <div className="text-sm text-red-700">
+                        <p className="font-medium mb-1">Reset Failed</p>
+                        <p className="text-xs sm:text-sm leading-relaxed">{forgotPasswordError}</p>
+                      </div>
                     </div>
                   )}
 
@@ -360,7 +399,7 @@ const LoginPage: React.FC = () => {
                         id="forgotPasswordEmail"
                         value={forgotPasswordEmail}
                         onChange={(e) => setForgotPasswordEmail(e.target.value)}
-                        placeholder="Enter your email address"
+                        placeholder="Enter your registered email address"
                         className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500 text-base form-input"
                         required
                         disabled={forgotPasswordLoading}
@@ -372,10 +411,15 @@ const LoginPage: React.FC = () => {
                   {/* Info Box */}
                   <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4">
                     <div className="flex items-start space-x-3">
-                      <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                      <Info className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 flex-shrink-0 mt-0.5" />
                       <div className="text-sm text-blue-700">
-                        <p className="font-medium mb-1">Password Reset Instructions</p>
-                        <p className="text-xs sm:text-sm">We'll send you a secure link to reset your password. Check your email and follow the instructions.</p>
+                        <p className="font-medium mb-1">Password Reset Process</p>
+                        <ul className="text-xs sm:text-sm space-y-1">
+                          <li>• Enter the email address you used to register</li>
+                          <li>• Check your email (including spam folder)</li>
+                          <li>• Click the reset link within 1 hour</li>
+                          <li>• Create a new password</li>
+                        </ul>
                       </div>
                     </div>
                   </div>
