@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Bus, Menu, X, Clock, MapPin, Phone, Search, User, LogOut } from 'lucide-react';
+import { Bus, Menu, X, Clock, MapPin, Phone, Search, User, LogOut, Map } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const { user, userProfile, signOut } = useAuth();
@@ -205,17 +205,17 @@ const Navbar: React.FC = () => {
               <span>Schedules</span>
             </button>
             
-            <button
-              onClick={() => scrollToSection('routes')}
+            <Link
+              to="/routes"
               className={`flex items-center space-x-2 px-3 py-2 rounded-xl font-medium transition-all hover:scale-105 ${
                 isScrolled 
                   ? 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' 
                   : 'text-white hover:bg-white/10'
               }`}
             >
-              <MapPin className="h-4 w-4" />
-              <span>Routes</span>
-            </button>
+              <Map className="h-4 w-4" />
+              <span>Route Maps</span>
+            </Link>
           </div>
 
           {/* Right Side Actions - Completely Redesigned for Mobile */}
@@ -376,13 +376,14 @@ const Navbar: React.FC = () => {
                       <span>All Schedules</span>
                     </button>
                     
-                    <button
-                      onClick={() => scrollToSection('routes')}
+                    <Link
+                      to="/routes"
+                      onClick={handleLinkClick}
                       className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all text-sm font-medium"
                     >
-                      <MapPin className="h-4 w-4" />
-                      <span>Route Information</span>
-                    </button>
+                      <Map className="h-4 w-4" />
+                      <span>Route Maps</span>
+                    </Link>
                   </div>
                   
                   {/* Authentication Section - Auto-close on click */}

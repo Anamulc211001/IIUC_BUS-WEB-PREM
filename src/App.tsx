@@ -10,6 +10,7 @@ import SignupPage from './pages/SignupPage';
 import StudentDashboard from './pages/StudentDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import RoutesPage from './pages/RoutesPage';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/routes" element={<RoutesPage />} />
           
           {/* Protected Routes */}
           <Route 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, MapPin, Route, ArrowRight, Users, Bus, Calendar, Star, Navigation, ChevronDown, ChevronUp, Zap, Sparkles, X } from 'lucide-react';
+import { Clock, MapPin, Route, ArrowRight, Users, Bus, Calendar, Star, Navigation, ChevronDown, ChevronUp, Zap, Sparkles, X, Map } from 'lucide-react';
 import { BusSchedule } from '../types/BusSchedule';
+import RouteMapModal from './RouteMapModal';
 
 interface BusCardProps {
   schedule: BusSchedule;
@@ -9,6 +10,7 @@ interface BusCardProps {
 const BusCard: React.FC<BusCardProps> = ({ schedule }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showLiveTrackingModal, setShowLiveTrackingModal] = useState(false);
+  const [showRouteMap, setShowRouteMap] = useState(false);
 
   // Auto-close modal after 5 seconds
   useEffect(() => {
@@ -105,6 +107,10 @@ const BusCard: React.FC<BusCardProps> = ({ schedule }) => {
 
   const handleLiveTrackingClick = () => {
     setShowLiveTrackingModal(true);
+  };
+
+  const handleViewRouteMap = () => {
+    setShowRouteMap(true);
   };
 
   return (
@@ -220,8 +226,16 @@ const BusCard: React.FC<BusCardProps> = ({ schedule }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3 sm:space-x-4">
               <button
-                onClick={handleLiveTrackingClick}
+                onClick={handleViewRouteMap}
                 className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600 transition-all duration-300 hover:text-blue-600 hover:scale-105 bg-white rounded-lg px-2 py-1 shadow-sm hover:shadow-md"
+              >
+                <Map className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-300 hover:scale-110" />
+                <span>View on Map</span>
+              </button>
+              
+              <button
+                onClick={handleLiveTrackingClick}
+                className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600 transition-all duration-300 hover:text-green-600 hover:scale-105 bg-white rounded-lg px-2 py-1 shadow-sm hover:shadow-md"
               >
                 <Bus className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-300 hover:scale-110" />
                 <span>Live tracking</span>
@@ -233,7 +247,7 @@ const BusCard: React.FC<BusCardProps> = ({ schedule }) => {
                 ✓ Active
               </span>
               <button
-                onClick={handleLiveTrackingClick}
+                onClick={handleViewRouteMap}
                 className="p-1.5 sm:p-2 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all duration-300 hover:scale-110 hover:rotate-12 transform"
               >
                 <Navigation className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -245,6 +259,14 @@ const BusCard: React.FC<BusCardProps> = ({ schedule }) => {
         {/* Hover Glow Effect */}
         <div className="absolute inset-0 rounded-2xl sm:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-indigo-500/5"></div>
       </div>
+
+      {/* Route Map Modal */}
+      <RouteMapModal
+        isOpen={showRouteMap}
+        onClose={() => setShowRouteMap(false)}
+        schedule={schedule}
+        title={`${schedule.startingPoint} → ${schedule.endPoint}`}
+      />
 
       {/* FIXED: Live Tracking Coming Soon Modal - Mobile Responsive */}
       {showLiveTrackingModal && (
