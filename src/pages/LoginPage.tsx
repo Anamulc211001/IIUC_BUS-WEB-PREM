@@ -13,6 +13,7 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
@@ -91,6 +92,65 @@ const LoginPage: React.FC = () => {
     }
 
     setIsLoading(false);
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setIsGoogleLoading(true);
+
+    try {
+      console.log('🔐 Starting Google sign-in...');
+      
+      // Check if Supabase is properly configured
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      
+      if (!supabaseUrl || !supabaseAnonKey || supabaseUrl === 'https://placeholder.supabase.co') {
+        setError('Google Sign-In is not configured. Please contact the administrator.');
+        setShowEmailSetupGuide(true);
+        setIsGoogleLoading(false);
+        return;
+      }
+
+      // Attempt Google OAuth sign-in
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/login?google=success`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        }
+      });
+
+      if (error) {
+        console.error('❌ Google sign-in error:', error);
+        
+        // Handle specific error cases
+        if (error.message?.includes('not enabled') || error.message?.includes('provider')) {
+          setError('Google Sign-In is not enabled. Please contact the administrator to enable Google OAuth.');
+          setShowEmailSetupGuide(true);
+        } else if (error.message?.includes('redirect') || error.message?.includes('url')) {
+          setError('Google Sign-In configuration error. Please contact the administrator.');
+          setShowEmailSetupGuide(true);
+        } else if (error.message?.includes('network') || error.message?.includes('connection')) {
+          setError('Network error. Please check your internet connection and try again.');
+        } else {
+          setError(`Google Sign-In failed: ${error.message}. Please try again or use email/password login.`);
+        }
+      } else {
+        console.log('✅ Google sign-in initiated successfully');
+        // The redirect will happen automatically
+        // Don't set loading to false here as the page will redirect
+        return;
+      }
+    } catch (err: any) {
+      console.error('❌ Unexpected Google sign-in error:', err);
+      setError('An unexpected error occurred with Google Sign-In. Please try again or use email/password login.');
+    }
+
+    setIsGoogleLoading(false);
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -245,7 +305,7 @@ const LoginPage: React.FC = () => {
               
               {!showForgotPassword ? (
                 // Login Form
-                <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+                <div className="space-y-5 sm:space-y-6">
                   
                   {/* Error Message - Mobile Optimized */}
                   {error && (
@@ -279,92 +339,131 @@ const LoginPage: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Identifier Field - Mobile Optimized */}
-                  <div>
-                    <label htmlFor="identifier" className="block text-sm font-semibold text-gray-700 mb-2">
-                      Email or University ID
-                    </label>
+                  {/* Google Sign-In Button - Enhanced */}
+                  <div className="space-y-4">
+                    <button
+                      onClick={handleGoogleSignIn}
+                      disabled={isGoogleLoading || isLoading}
+                      className="w-full flex items-center justify-center space-x-3 px-4 sm:px-6 py-3 sm:py-4 bg-white border-2 border-gray-200 rounded-xl sm:rounded-2xl hover:border-gray-300 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow-md text-base button-smooth"
+                    >
+                      {isGoogleLoading ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+                          <span className="text-gray-600 font-medium">Signing in with Google...</span>
+                        </>
+                      ) : (
+                        <>
+                          {/* Google Icon */}
+                          <svg className="h-5 w-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                          </svg>
+                          <span className="text-gray-700 font-medium">Continue with Google</span>
+                        </>
+                      )}
+                    </button>
+
+                    {/* Divider */}
                     <div className="relative">
-                      <User className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                      <input
-                        type="text"
-                        id="identifier"
-                        name="identifier"
-                        value={formData.identifier}
-                        onChange={handleChange}
-                        placeholder="Enter your email or university ID"
-                        className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500 text-base form-input"
-                        required
-                        disabled={isLoading}
-                        autoComplete="username"
-                        autoCapitalize="none"
-                        autoCorrect="off"
-                      />
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200"></div>
+                      </div>
+                      <div className="relative flex justify-center text-sm">
+                        <span className="px-4 bg-white text-gray-500 font-medium">Or continue with email</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Password Field - Mobile Optimized */}
-                  <div>
-                    <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                      Password
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        id="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder="Enter your password"
-                        className="w-full pl-10 sm:pl-12 pr-12 sm:pr-14 py-3 sm:py-4 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500 text-base form-input"
-                        required
-                        disabled={isLoading}
-                        autoComplete="current-password"
-                      />
+                  <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+                    {/* Identifier Field - Mobile Optimized */}
+                    <div>
+                      <label htmlFor="identifier" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Email or University ID
+                      </label>
+                      <div className="relative">
+                        <User className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                        <input
+                          type="text"
+                          id="identifier"
+                          name="identifier"
+                          value={formData.identifier}
+                          onChange={handleChange}
+                          placeholder="Enter your email or university ID"
+                          className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500 text-base form-input"
+                          required
+                          disabled={isLoading || isGoogleLoading}
+                          autoComplete="username"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Password Field - Mobile Optimized */}
+                    <div>
+                      <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          id="password"
+                          name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          placeholder="Enter your password"
+                          className="w-full pl-10 sm:pl-12 pr-12 sm:pr-14 py-3 sm:py-4 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-gray-900 placeholder-gray-500 text-base form-input"
+                          required
+                          disabled={isLoading || isGoogleLoading}
+                          autoComplete="current-password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                          disabled={isLoading || isGoogleLoading}
+                          tabIndex={-1}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Forgot Password Link */}
+                    <div className="text-right">
                       <button
                         type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
-                        disabled={isLoading}
-                        tabIndex={-1}
+                        onClick={() => setShowForgotPassword(true)}
+                        className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors flex items-center space-x-1 ml-auto"
                       >
-                        {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
+                        <Key className="h-3 w-3" />
+                        <span>Forgot Password?</span>
                       </button>
                     </div>
-                  </div>
 
-                  {/* Forgot Password Link */}
-                  <div className="text-right">
+                    {/* Submit Button - Mobile Optimized */}
                     <button
-                      type="button"
-                      onClick={() => setShowForgotPassword(true)}
-                      className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors flex items-center space-x-1 ml-auto"
+                      type="submit"
+                      disabled={isLoading || isGoogleLoading}
+                      className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 sm:py-4 px-6 rounded-xl sm:rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-base button-smooth"
                     >
-                      <Key className="h-3 w-3" />
-                      <span>Forgot Password?</span>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                          <span>Signing In...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Sign In</span>
+                          <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
+                        </>
+                      )}
                     </button>
-                  </div>
-
-                  {/* Submit Button - Mobile Optimized */}
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 sm:py-4 px-6 rounded-xl sm:rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-base button-smooth"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                        <span>Signing In...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Sign In</span>
-                        <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
-                      </>
-                    )}
-                  </button>
-                </form>
+                  </form>
+                </div>
               ) : (
                 // Forgot Password Form
                 <form onSubmit={handleForgotPassword} className="space-y-5 sm:space-y-6">
@@ -397,13 +496,17 @@ const LoginPage: React.FC = () => {
                       <div className="flex items-start space-x-3">
                         <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500 flex-shrink-0 mt-0.5" />
                         <div className="text-sm text-orange-800">
-                          <p className="font-medium mb-2">⚙️ Email Service Setup Required</p>
-                          <p className="text-xs mb-3">The administrator needs to configure Supabase email settings:</p>
+                          <p className="font-medium mb-2">⚙️ OAuth & Email Service Setup Required</p>
+                          <p className="text-xs mb-3">The administrator needs to configure Supabase settings:</p>
                           <div className="space-y-1 text-xs">
-                            <p>1. Go to Supabase Dashboard → Authentication → Settings</p>
-                            <p>2. Configure SMTP settings or use Supabase's email service</p>
-                            <p>3. Set up email templates for password reset</p>
-                            <p>4. Enable email confirmations</p>
+                            <p><strong>For Google Sign-In:</strong></p>
+                            <p>1. Go to Supabase Dashboard → Authentication → Providers</p>
+                            <p>2. Enable Google OAuth provider</p>
+                            <p>3. Add Google Client ID and Secret</p>
+                            <p>4. Configure redirect URLs</p>
+                            <p><strong>For Email Features:</strong></p>
+                            <p>5. Configure SMTP settings in Email section</p>
+                            <p>6. Set up email templates</p>
                           </div>
                           <div className="mt-3 pt-2 border-t border-orange-200">
                             <p className="font-medium text-xs">📧 Alternative Solutions:</p>
@@ -510,6 +613,39 @@ const LoginPage: React.FC = () => {
               )}
             </div>
 
+            {/* Google Sign-In Benefits - Mobile Optimized */}
+            {!showForgotPassword && (
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-green-200 mb-6">
+                <h3 className="font-semibold text-green-900 mb-3 text-center text-sm sm:text-base flex items-center justify-center space-x-2">
+                  <svg className="h-4 w-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  <span>Why Use Google Sign-In?</span>
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm text-green-700">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span>No password to remember</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span>Instant account creation</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span>Enhanced security</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span>One-click access</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Admin Setup Guide - Mobile Optimized */}
             {showEmailSetupGuide && (
               <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-purple-200 mb-6">
@@ -519,28 +655,28 @@ const LoginPage: React.FC = () => {
                     <p className="font-semibold mb-2 flex items-center space-x-2">
                       <span>🔧 For Administrators</span>
                     </p>
-                    <p className="text-xs mb-3">To enable password reset functionality, configure Supabase email settings:</p>
+                    <p className="text-xs mb-3">To enable Google Sign-In and password reset, configure Supabase:</p>
                     
                     <div className="bg-white/50 rounded-lg p-3 mb-3">
-                      <p className="font-medium text-xs mb-2">📋 Quick Setup Steps:</p>
+                      <p className="font-medium text-xs mb-2">📋 Google OAuth Setup:</p>
                       <ol className="text-xs space-y-1 list-decimal list-inside">
                         <li>Open your Supabase Dashboard</li>
-                        <li>Go to Authentication → Settings → Email</li>
-                        <li>Configure SMTP or use Supabase's email service</li>
-                        <li>Enable "Confirm email" and "Reset password" templates</li>
-                        <li>Test the configuration</li>
+                        <li>Go to Authentication → Providers</li>
+                        <li>Enable Google provider</li>
+                        <li>Add Google OAuth credentials</li>
+                        <li>Configure redirect URLs</li>
                       </ol>
                     </div>
                     
                     <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                       <a
-                        href="https://supabase.com/docs/guides/auth/auth-smtp"
+                        href="https://supabase.com/docs/guides/auth/social-login/auth-google"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center space-x-1 text-xs text-purple-600 hover:text-purple-700 font-medium"
                       >
                         <ExternalLink className="h-3 w-3" />
-                        <span>Supabase Email Docs</span>
+                        <span>Google OAuth Docs</span>
                       </a>
                       <a
                         href="https://supabase.com/dashboard"
@@ -564,7 +700,7 @@ const LoginPage: React.FC = () => {
                   <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-green-700">
                     <p className="font-semibold mb-1">Just Verified Your Email?</p>
-                    <p className="text-xs sm:text-sm">Perfect! You can now sign in with your credentials.</p>
+                    <p className="text-xs sm:text-sm">Perfect! You can now sign in with your credentials or use Google Sign-In.</p>
                   </div>
                 </div>
               </div>
