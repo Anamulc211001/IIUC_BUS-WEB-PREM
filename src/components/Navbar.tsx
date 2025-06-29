@@ -318,7 +318,7 @@ const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* ENHANCED Mobile Menu - Auto-Close Functionality */}
+        {/* FIXED: Enhanced Mobile Menu - Compact and User-Friendly */}
         {isMobileMenuOpen && (
           <>
             {/* Backdrop for click-outside detection */}
@@ -327,135 +327,133 @@ const Navbar: React.FC = () => {
               onClick={() => setIsMobileMenuOpen(false)}
             />
             
-            {/* Mobile Menu Container */}
+            {/* FIXED: Mobile Menu Container - Compact Design */}
             <div 
               ref={mobileMenuRef}
-              className="lg:hidden absolute top-full left-4 right-4 mt-2 bg-white/95 backdrop-blur-md border border-gray-200/50 shadow-2xl rounded-2xl overflow-hidden animate-fade-slide-up z-50"
+              className="lg:hidden absolute top-full left-4 right-4 mt-2 bg-white/95 backdrop-blur-md border border-gray-200/50 shadow-2xl rounded-2xl overflow-hidden animate-fade-slide-up z-50 max-h-[80vh] overflow-y-auto"
             >
-              <div className="max-h-[80vh] overflow-y-auto">
-                <div className="p-4 space-y-3">
-                  
-                  {/* User Info Section - Compact */}
-                  {user && userProfile && (
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-200 mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
-                          <User className="h-4 w-4 text-white" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-gray-900 text-sm truncate">{userProfile.name}</p>
-                          <p className="text-xs text-gray-600">{userProfile.university_id} • {userProfile.role}</p>
-                        </div>
+              <div className="p-4 space-y-3">
+                
+                {/* User Info Section - Compact */}
+                {user && userProfile && (
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-200 mb-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-gray-900 text-sm truncate">{userProfile.name}</p>
+                        <p className="text-xs text-gray-600">{userProfile.university_id} • {userProfile.role}</p>
                       </div>
                     </div>
-                  )}
-
-                  {/* Navigation Links - Auto-close on click */}
-                  <div className="space-y-1">
-                    <button
-                      onClick={() => scrollToSection('home')}
-                      className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all text-sm font-medium"
-                    >
-                      <Bus className="h-4 w-4" />
-                      <span>Home</span>
-                    </button>
-                    
-                    <button
-                      onClick={() => scrollToSection('search-filters')}
-                      className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all text-sm font-medium"
-                    >
-                      <Search className="h-4 w-4" />
-                      <span>Search Schedules</span>
-                    </button>
-                    
-                    <button
-                      onClick={() => scrollToSection('schedules')}
-                      className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all text-sm font-medium"
-                    >
-                      <Clock className="h-4 w-4" />
-                      <span>All Schedules</span>
-                    </button>
-                    
-                    <Link
-                      to="/routes"
-                      onClick={handleLinkClick}
-                      className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all text-sm font-medium"
-                    >
-                      <Map className="h-4 w-4" />
-                      <span>Route Maps</span>
-                    </Link>
                   </div>
+                )}
+
+                {/* Navigation Links - Auto-close on click */}
+                <div className="space-y-1">
+                  <button
+                    onClick={() => scrollToSection('home')}
+                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all text-sm font-medium"
+                  >
+                    <Bus className="h-4 w-4" />
+                    <span>Home</span>
+                  </button>
                   
-                  {/* Authentication Section - Auto-close on click */}
-                  <div className="pt-3 border-t border-gray-200">
-                    {user && userProfile ? (
+                  <button
+                    onClick={() => scrollToSection('search-filters')}
+                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all text-sm font-medium"
+                  >
+                    <Search className="h-4 w-4" />
+                    <span>Search Schedules</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => scrollToSection('schedules')}
+                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all text-sm font-medium"
+                  >
+                    <Clock className="h-4 w-4" />
+                    <span>All Schedules</span>
+                  </button>
+                  
+                  <Link
+                    to="/routes"
+                    onClick={handleLinkClick}
+                    className="flex items-center space-x-3 w-full px-3 py-2.5 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all text-sm font-medium"
+                  >
+                    <Map className="h-4 w-4" />
+                    <span>Route Maps</span>
+                  </Link>
+                </div>
+                
+                {/* Authentication Section - Auto-close on click */}
+                <div className="pt-3 border-t border-gray-200">
+                  {user && userProfile ? (
+                    <div className="space-y-2">
+                      {/* Dashboard Button */}
+                      <Link
+                        to={getDashboardRoute()}
+                        onClick={handleLinkClick}
+                        className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg text-sm"
+                      >
+                        <User className="h-4 w-4" />
+                        <span>Go to Dashboard</span>
+                      </Link>
+
+                      {/* Logout Button */}
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center justify-center space-x-2 w-full px-4 py-2.5 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-all border border-red-200 text-sm"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {/* Welcome Message - Compact */}
+                      <div className="text-center py-2">
+                        <h3 className="font-semibold text-gray-900 text-sm mb-1">Welcome to IIUC Bus Finder</h3>
+                        <p className="text-xs text-gray-600">Login or create account for personalized features</p>
+                      </div>
+
+                      {/* Authentication Buttons - Auto-close on click */}
                       <div className="space-y-2">
-                        {/* Dashboard Button */}
                         <Link
-                          to={getDashboardRoute()}
+                          to="/login"
+                          onClick={handleLinkClick}
+                          className="flex items-center justify-center space-x-2 w-full px-4 py-2.5 bg-white text-blue-600 rounded-xl font-medium hover:bg-blue-50 transition-all shadow-sm border border-blue-200 text-sm"
+                        >
+                          <User className="h-4 w-4" />
+                          <span>Login</span>
+                        </Link>
+                        
+                        <Link
+                          to="/signup"
                           onClick={handleLinkClick}
                           className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg text-sm"
                         >
-                          <User className="h-4 w-4" />
-                          <span>Go to Dashboard</span>
+                          <span>Sign Up</span>
                         </Link>
-
-                        {/* Logout Button */}
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center justify-center space-x-2 w-full px-4 py-2.5 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-all border border-red-200 text-sm"
-                        >
-                          <LogOut className="h-4 w-4" />
-                          <span>Logout</span>
-                        </button>
                       </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {/* Welcome Message - Compact */}
-                        <div className="text-center py-2">
-                          <h3 className="font-semibold text-gray-900 text-sm mb-1">Welcome to IIUC Bus Finder</h3>
-                          <p className="text-xs text-gray-600">Login or create account for personalized features</p>
-                        </div>
 
-                        {/* Authentication Buttons - Auto-close on click */}
-                        <div className="space-y-2">
-                          <Link
-                            to="/login"
-                            onClick={handleLinkClick}
-                            className="flex items-center justify-center space-x-2 w-full px-4 py-2.5 bg-white text-blue-600 rounded-xl font-medium hover:bg-blue-50 transition-all shadow-sm border border-blue-200 text-sm"
-                          >
-                            <User className="h-4 w-4" />
-                            <span>Login</span>
-                          </Link>
-                          
-                          <Link
-                            to="/signup"
-                            onClick={handleLinkClick}
-                            className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg text-sm"
-                          >
-                            <span>Sign Up</span>
-                          </Link>
-                        </div>
-
-                        {/* Benefits List - Compact */}
-                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
-                          <h4 className="font-semibold text-green-900 mb-1 text-xs">Account Benefits:</h4>
-                          <ul className="text-xs text-green-700 space-y-0.5">
-                            <li>• Personalized schedules</li>
-                            <li>• Submit feedback</li>
-                            <li>• Real-time notifications</li>
-                          </ul>
-                        </div>
+                      {/* Benefits List - Compact */}
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
+                        <h4 className="font-semibold text-green-900 mb-1 text-xs">📋 Account Benefits:</h4>
+                        <ul className="text-xs text-green-700 space-y-0.5">
+                          <li>• Personalized schedules</li>
+                          <li>• Submit feedback</li>
+                          <li>• Real-time notifications</li>
+                        </ul>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
+                </div>
 
-                  {/* Close Menu Hint */}
-                  <div className="pt-2 border-t border-gray-200">
-                    <p className="text-center text-xs text-gray-500">
-                      Tap outside or press ESC to close menu
-                    </p>
-                  </div>
+                {/* Close Menu Hint */}
+                <div className="pt-2 border-t border-gray-200">
+                  <p className="text-center text-xs text-gray-500">
+                    Tap outside or press ESC to close menu
+                  </p>
                 </div>
               </div>
             </div>
