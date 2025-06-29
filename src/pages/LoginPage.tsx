@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Bus, Lock, User, Eye, EyeOff, AlertCircle, Loader2, Mail, CheckCircle, Wifi, WifiOff, ArrowLeft, Sparkles, Key, Info } from 'lucide-react';
+import { Bus, Lock, User, Eye, EyeOff, AlertCircle, Loader2, Mail, CheckCircle, Wifi, WifiOff, ArrowLeft, Sparkles, Key, Info, Settings, ExternalLink, Shield } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
   const { signIn, user, userProfile, loading } = useAuth();
@@ -18,6 +18,7 @@ const LoginPage: React.FC = () => {
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
   const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState('');
   const [forgotPasswordError, setForgotPasswordError] = useState('');
+  const [showEmailSetupGuide, setShowEmailSetupGuide] = useState(false);
 
   // Show loading spinner while auth is initializing
   if (loading) {
@@ -121,6 +122,7 @@ const LoginPage: React.FC = () => {
       
       if (!supabaseUrl || !supabaseAnonKey || supabaseUrl === 'https://placeholder.supabase.co') {
         setForgotPasswordError('Email service is not configured. Please contact the administrator.');
+        setShowEmailSetupGuide(true);
         setForgotPasswordLoading(false);
         return;
       }
@@ -156,10 +158,12 @@ const LoginPage: React.FC = () => {
           setForgotPasswordError('No account found with this email address. Please check your email or sign up for a new account.');
         } else if (error.message?.includes('email not confirmed')) {
           setForgotPasswordError('Your email address is not verified. Please check your email for the verification link first.');
-        } else if (error.message?.includes('smtp') || error.message?.includes('email')) {
-          setForgotPasswordError('Email service is temporarily unavailable. Please try again later or contact support.');
+        } else if (error.message?.includes('smtp') || error.message?.includes('email') || error.message?.includes('service')) {
+          setForgotPasswordError('Email service is not configured. Please contact the administrator.');
+          setShowEmailSetupGuide(true);
         } else {
           setForgotPasswordError(`Password reset failed: ${error.message}. Please try again or contact support.`);
+          setShowEmailSetupGuide(true);
         }
       } else {
         console.log('✅ Password reset email sent successfully');
@@ -387,6 +391,33 @@ const LoginPage: React.FC = () => {
                     </div>
                   )}
 
+                  {/* Email Setup Guide */}
+                  {showEmailSetupGuide && (
+                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 sm:p-4">
+                      <div className="flex items-start space-x-3">
+                        <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-orange-800">
+                          <p className="font-medium mb-2">⚙️ Email Service Setup Required</p>
+                          <p className="text-xs mb-3">The administrator needs to configure Supabase email settings:</p>
+                          <div className="space-y-1 text-xs">
+                            <p>1. Go to Supabase Dashboard → Authentication → Settings</p>
+                            <p>2. Configure SMTP settings or use Supabase's email service</p>
+                            <p>3. Set up email templates for password reset</p>
+                            <p>4. Enable email confirmations</p>
+                          </div>
+                          <div className="mt-3 pt-2 border-t border-orange-200">
+                            <p className="font-medium text-xs">📧 Alternative Solutions:</p>
+                            <div className="space-y-1 text-xs">
+                              <p>• Contact admin directly for password reset</p>
+                              <p>• Create a new account if needed</p>
+                              <p>• Use university ID login if available</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Email Field */}
                   <div>
                     <label htmlFor="forgotPasswordEmail" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -452,6 +483,7 @@ const LoginPage: React.FC = () => {
                         setForgotPasswordEmail('');
                         setForgotPasswordError('');
                         setForgotPasswordSuccess('');
+                        setShowEmailSetupGuide(false);
                       }}
                       className="text-gray-600 hover:text-gray-700 font-medium text-sm transition-colors flex items-center space-x-1 mx-auto"
                     >
@@ -477,6 +509,53 @@ const LoginPage: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Admin Setup Guide - Mobile Optimized */}
+            {showEmailSetupGuide && (
+              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-purple-200 mb-6">
+                <div className="flex items-start space-x-3">
+                  <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-purple-800">
+                    <p className="font-semibold mb-2 flex items-center space-x-2">
+                      <span>🔧 For Administrators</span>
+                    </p>
+                    <p className="text-xs mb-3">To enable password reset functionality, configure Supabase email settings:</p>
+                    
+                    <div className="bg-white/50 rounded-lg p-3 mb-3">
+                      <p className="font-medium text-xs mb-2">📋 Quick Setup Steps:</p>
+                      <ol className="text-xs space-y-1 list-decimal list-inside">
+                        <li>Open your Supabase Dashboard</li>
+                        <li>Go to Authentication → Settings → Email</li>
+                        <li>Configure SMTP or use Supabase's email service</li>
+                        <li>Enable "Confirm email" and "Reset password" templates</li>
+                        <li>Test the configuration</li>
+                      </ol>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                      <a
+                        href="https://supabase.com/docs/guides/auth/auth-smtp"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center space-x-1 text-xs text-purple-600 hover:text-purple-700 font-medium"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        <span>Supabase Email Docs</span>
+                      </a>
+                      <a
+                        href="https://supabase.com/dashboard"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center space-x-1 text-xs text-purple-600 hover:text-purple-700 font-medium"
+                      >
+                        <Settings className="h-3 w-3" />
+                        <span>Supabase Dashboard</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Success Notice - Mobile Optimized */}
             {!showForgotPassword && (
