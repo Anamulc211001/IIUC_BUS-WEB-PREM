@@ -190,8 +190,9 @@ const Footer: React.FC = () => {
             {/* FIXED: Developer Contact Section - Mobile Stack */}
             <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 border border-blue-500/20 w-full lg:w-auto">
               <div className="text-center lg:text-left mb-2 sm:mb-3">
-                <span className="text-gray-300 text-xs sm:text-sm">Developed by</span>
-                <span className="text-white font-semibold text-xs sm:text-sm ml-2">Md Anamul Haque</span>
+                <span className="text-gray-300 text-xs sm:text-sm">Developed with</span>
+                <Heart className="inline h-3 w-3 text-red-400 mx-1" />
+                <span className="text-white font-semibold text-xs sm:text-sm">by Md Anamul Haque</span>
               </div>
               
               {/* FIXED: Developer Contact Info - Mobile Stack */}
