@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Map, Search, Filter, Bus, Clock, MapPin, Navigation, Route, Globe, Star, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Map, Search, Filter, Bus, Clock, MapPin, Navigation, Route, Globe, Star, CheckCircle, Settings, Wrench } from 'lucide-react';
 import { busSchedules } from '../data/busSchedules';
 import { useSearch } from '../hooks/useSearch';
 import RouteVisualization from '../components/RouteVisualization';
@@ -45,8 +45,8 @@ const RoutesPage: React.FC = () => {
                 <div>
                   <h1 className="text-lg sm:text-xl font-bold text-gray-900">Route Maps</h1>
                   <p className="text-xs sm:text-sm text-gray-600 flex items-center space-x-1">
-                    <Globe className="h-3 w-3 text-green-500" />
-                    <span>Free OpenStreetMap</span>
+                    <Settings className="h-3 w-3 text-blue-500" />
+                    <span>Coming Soon</span>
                   </p>
                 </div>
               </div>
@@ -57,7 +57,7 @@ const RoutesPage: React.FC = () => {
                 onClick={() => setViewMode('map')}
                 className={`flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 rounded-xl font-medium transition-all text-sm ${
                   viewMode === 'map'
-                    ? 'bg-green-500 text-white shadow-lg'
+                    ? 'bg-blue-500 text-white shadow-lg'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -155,37 +155,43 @@ const RoutesPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Free Maps Benefits */}
+        {/* Maps Feature Coming Soon Notice */}
         {viewMode === 'map' && (
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border border-green-200">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border border-blue-200">
             <div className="flex items-start space-x-3">
-              <div className="bg-green-500 rounded-full p-2 flex-shrink-0">
-                <Star className="h-5 w-5 text-white" />
+              <div className="bg-blue-500 rounded-full p-2 flex-shrink-0">
+                <Wrench className="h-5 w-5 text-white" />
               </div>
-              <div className="text-sm text-green-800">
+              <div className="text-sm text-blue-800">
                 <p className="font-semibold mb-2 flex items-center space-x-2">
-                  <span>🎉 Free Interactive Maps - No Setup Required!</span>
+                  <span>🚧 Maps Feature is on Working - Coming Soon!</span>
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-xs">No API keys needed</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-xs">Completely free to use</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-xs">Interactive zoom & pan</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-xs">Multiple map layers</span>
+                <p className="mb-3 leading-relaxed">
+                  We're excited to announce that our interactive maps feature is currently under development! Our team is working hard to bring you the best route visualization experience. We apologize for any inconvenience and truly appreciate your patience and trust in our service.
+                </p>
+                <div className="bg-white/50 rounded-lg p-3 mb-3">
+                  <p className="font-medium text-xs mb-2">🎯 What's Coming:</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-3 w-3 text-blue-600" />
+                      <span className="text-xs">Interactive route maps</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-3 w-3 text-blue-600" />
+                      <span className="text-xs">Real-time bus tracking</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-3 w-3 text-blue-600" />
+                      <span className="text-xs">Turn-by-turn directions</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-3 w-3 text-blue-600" />
+                      <span className="text-xs">Nearby stops finder</span>
+                    </div>
                   </div>
                 </div>
-                <p className="text-xs text-green-600 font-medium">
-                  🌍 Powered by OpenStreetMap - the free, editable map of the world
+                <p className="text-xs text-blue-600 font-medium">
+                  ⏰ Thank you for your patience! This feature will be available very soon and will make your bus journey planning much easier.
                 </p>
               </div>
             </div>

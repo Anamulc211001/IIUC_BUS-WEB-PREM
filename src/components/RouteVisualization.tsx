@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, Navigation, Bus, Clock, MapPin, Route, Eye, Maximize2, CheckCircle, Star } from 'lucide-react';
+import { Globe, Navigation, Bus, Clock, MapPin, Route, Eye, Maximize2, CheckCircle, Star, Settings, Wrench } from 'lucide-react';
 import { BusSchedule } from '../types/BusSchedule';
 import RouteMapModal from './RouteMapModal';
 
@@ -41,22 +41,19 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-3">
+            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-3">
               <Globe className="h-6 w-6 text-white" />
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Route Visualization</h2>
-              <p className="text-gray-600 text-sm sm:text-base flex items-center space-x-2">
-                <Star className="h-3 w-3 text-green-500" />
-                <span>Free interactive maps with OpenStreetMap</span>
-              </p>
+              <p className="text-gray-600 text-sm sm:text-base">Interactive bus route maps and schedules</p>
             </div>
           </div>
           
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <button
               onClick={openAllRoutesMap}
-              className="flex items-center justify-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
+              className="flex items-center justify-center space-x-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
               <Maximize2 className="h-4 w-4 sm:h-5 sm:w-5" />
               <span>View All Routes</span>
@@ -64,32 +61,43 @@ const RouteVisualization: React.FC<RouteVisualizationProps> = ({
           </div>
         </div>
 
-        {/* Free Maps Benefits */}
-        <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+        {/* Maps Feature Coming Soon Notice */}
+        <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
           <div className="flex items-start space-x-3">
-            <Globe className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-green-800">
-              <p className="font-semibold mb-1">🎉 Free & Open Source Mapping</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mb-2">
-                <div className="flex items-center space-x-1">
-                  <CheckCircle className="h-3 w-3 text-green-600" />
-                  <span className="text-xs">No API keys required</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <CheckCircle className="h-3 w-3 text-green-600" />
-                  <span className="text-xs">Works immediately</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <CheckCircle className="h-3 w-3 text-green-600" />
-                  <span className="text-xs">Interactive zoom & pan</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <CheckCircle className="h-3 w-3 text-green-600" />
-                  <span className="text-xs">Multiple map layers</span>
+            <div className="bg-blue-500 rounded-full p-2 flex-shrink-0">
+              <Settings className="h-5 w-5 text-white" />
+            </div>
+            <div className="text-sm text-blue-800">
+              <p className="font-semibold mb-2 flex items-center space-x-2">
+                <Wrench className="h-4 w-4" />
+                <span>🚧 Maps Feature Under Development</span>
+              </p>
+              <p className="mb-3 leading-relaxed">
+                We're working hard to bring you an amazing interactive maps experience! Our development team is currently implementing advanced route visualization features that will make finding your bus routes even easier.
+              </p>
+              <div className="bg-white/50 rounded-lg p-3 mb-3">
+                <p className="font-medium text-xs mb-2">🎯 What's Coming Soon:</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-blue-600" />
+                    <span className="text-xs">Interactive route maps</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-blue-600" />
+                    <span className="text-xs">Real-time bus locations</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-blue-600" />
+                    <span className="text-xs">Turn-by-turn directions</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-3 w-3 text-blue-600" />
+                    <span className="text-xs">Nearby stops finder</span>
+                  </div>
                 </div>
               </div>
-              <p className="text-xs text-green-600 font-medium">
-                🌍 Powered by OpenStreetMap contributors worldwide
+              <p className="text-xs text-blue-600 font-medium">
+                ⏰ Expected launch: Very soon! Thank you for your patience and trust in our service.
               </p>
             </div>
           </div>

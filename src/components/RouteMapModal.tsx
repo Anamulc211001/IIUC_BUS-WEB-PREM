@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Maximize2, Minimize2, Map, Navigation, Bus, Clock, AlertCircle, Settings, Globe, Star } from 'lucide-react';
+import { X, Maximize2, Minimize2, Map, Navigation, Bus, Clock, AlertCircle, Settings, Globe, Star, Wrench, CheckCircle } from 'lucide-react';
 import { BusSchedule } from '../types/BusSchedule';
 import RouteMap from './RouteMap';
 
@@ -42,16 +42,16 @@ const RouteMapModal: React.FC<RouteMapModalProps> = ({
         }`}>
           
           {/* Header */}
-          <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 sm:p-6 flex items-center justify-between flex-shrink-0">
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 sm:p-6 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center space-x-3 min-w-0 flex-1">
               <div className="bg-white/20 rounded-full p-2 flex-shrink-0">
-                <Globe className="h-5 w-5 sm:h-6 sm:w-6" />
+                <Settings className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-lg sm:text-xl font-bold truncate">{displayTitle}</h3>
-                <p className="text-green-100 text-sm flex items-center space-x-2">
-                  <Star className="h-3 w-3" />
-                  <span>Free OpenStreetMap • No API Key Required</span>
+                <p className="text-blue-100 text-sm flex items-center space-x-2">
+                  <Wrench className="h-3 w-3" />
+                  <span>Maps Feature Coming Soon</span>
                 </p>
               </div>
             </div>
@@ -60,7 +60,7 @@ const RouteMapModal: React.FC<RouteMapModalProps> = ({
               <button
                 onClick={() => setShowMapInfo(!showMapInfo)}
                 className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                title="Map Information"
+                title="Feature Information"
               >
                 <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
@@ -76,29 +76,32 @@ const RouteMapModal: React.FC<RouteMapModalProps> = ({
               <button
                 onClick={onClose}
                 className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                title="Close Map"
+                title="Close"
               >
                 <X className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
           </div>
 
-          {/* Map Info Panel */}
+          {/* Feature Info Panel */}
           {showMapInfo && (
-            <div className="bg-green-50 border-b border-green-200 p-4">
+            <div className="bg-blue-50 border-b border-blue-200 p-4">
               <div className="flex items-start space-x-3">
-                <Globe className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-green-800">
-                  <p className="font-semibold mb-2">Free & Open Source Mapping</p>
+                <Wrench className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-800">
+                  <p className="font-semibold mb-2">🚧 Interactive Maps Under Development</p>
+                  <p className="mb-3 leading-relaxed">
+                    We're working hard to bring you an amazing interactive maps experience! Our development team is implementing advanced features to make your bus journey planning easier and more intuitive.
+                  </p>
                   <div className="space-y-1 text-xs">
-                    <p>✅ <strong>OpenStreetMap:</strong> Free, open-source mapping data</p>
-                    <p>✅ <strong>No API Keys:</strong> Works immediately without setup</p>
-                    <p>✅ <strong>Interactive:</strong> Zoom, pan, and explore routes</p>
-                    <p>✅ <strong>Multiple Layers:</strong> Street view and satellite imagery</p>
-                    <p>✅ <strong>Real Routes:</strong> Accurate IIUC bus route visualization</p>
+                    <p>✅ <strong>Coming Soon:</strong> Interactive route visualization</p>
+                    <p>✅ <strong>Real-time Tracking:</strong> Live bus locations</p>
+                    <p>✅ <strong>Smart Navigation:</strong> Turn-by-turn directions</p>
+                    <p>✅ <strong>Stop Finder:</strong> Nearby bus stops locator</p>
+                    <p>✅ <strong>Route Planner:</strong> Best route suggestions</p>
                   </div>
-                  <p className="text-xs text-green-600 mt-2 font-medium">
-                    🌍 Powered by OpenStreetMap contributors worldwide
+                  <p className="text-xs text-blue-600 mt-2 font-medium">
+                    ⏰ Thank you for your patience and trust! This feature will be available very soon.
                   </p>
                 </div>
               </div>
@@ -134,33 +137,76 @@ const RouteMapModal: React.FC<RouteMapModalProps> = ({
             </div>
           )}
 
-          {/* Map Container */}
-          <div className="flex-1 relative min-h-0">
-            <RouteMap 
-              schedule={schedule}
-              schedules={schedules}
-              isFullscreen={isFullscreen}
-              onClose={isFullscreen ? onClose : undefined}
-            />
+          {/* Map Container - Coming Soon Message */}
+          <div className="flex-1 relative min-h-0 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+            <div className="text-center max-w-md mx-auto p-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/50">
+                <div className="bg-blue-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <Wrench className="h-8 w-8 text-blue-600" />
+                </div>
+                
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Maps Feature Coming Soon!</h3>
+                <p className="text-gray-600 mb-4 leading-relaxed">
+                  We're working hard to bring you interactive route maps. This feature will help you visualize bus routes and plan your journey better.
+                </p>
+                
+                <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                  <p className="font-semibold text-blue-900 mb-2 text-sm">🎯 What's Coming:</p>
+                  <div className="space-y-1 text-xs text-blue-800 text-left">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-3 w-3 text-blue-600" />
+                      <span>Interactive route visualization</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-3 w-3 text-blue-600" />
+                      <span>Real-time bus tracking</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-3 w-3 text-blue-600" />
+                      <span>Turn-by-turn directions</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-3 w-3 text-blue-600" />
+                      <span>Nearby stops finder</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {schedule && (
+                  <div className="bg-gray-50 rounded-lg p-3 text-left">
+                    <p className="font-semibold text-gray-900 mb-2 text-sm">Current Route Info:</p>
+                    <div className="space-y-1 text-xs text-gray-600">
+                      <p><strong>Time:</strong> {schedule.time}</p>
+                      <p><strong>From:</strong> {schedule.startingPoint}</p>
+                      <p><strong>To:</strong> {schedule.endPoint}</p>
+                      <p><strong>Route:</strong> {schedule.route}</p>
+                    </div>
+                  </div>
+                )}
+                
+                <p className="text-xs text-blue-600 font-medium mt-4">
+                  ⏰ Thank you for your patience! We're working to make this available soon.
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Footer */}
           <div className="bg-gray-50 border-t border-gray-200 p-3 sm:p-4 flex items-center justify-between text-sm text-gray-600 flex-shrink-0">
             <div className="flex items-center space-x-3 sm:space-x-4">
               <span className="flex items-center space-x-1">
-                <Globe className="h-3 w-3 text-green-500" />
-                <span className="hidden sm:inline">Free OpenStreetMap</span>
-                <span className="sm:hidden">Free Maps</span>
+                <Settings className="h-3 w-3 text-blue-500" />
+                <span className="hidden sm:inline">Feature in Development</span>
+                <span className="sm:hidden">In Development</span>
               </span>
               <span className="flex items-center space-x-1">
-                <span>📍</span>
-                <span className="hidden sm:inline">Interactive Routes</span>
-                <span className="sm:hidden">Routes</span>
+                <span>🚧</span>
+                <span className="hidden sm:inline">Coming Soon</span>
+                <span className="sm:hidden">Soon</span>
               </span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-xs">Powered by</span>
-              <span className="font-semibold text-green-600">OpenStreetMap</span>
+              <span className="text-xs">IIUC Bus System</span>
             </div>
           </div>
         </div>
